@@ -1,0 +1,62 @@
+{
+ "data": {
+  "results": [
+   {
+    "quote": {
+     "symbol": "AVGO",
+     "last_trade_price": "362.595000",
+     "previous_close": "364.380000",
+     "has_traded": true,
+     "state": "active"
+    },
+    "close": {
+     "symbol": "AVGO",
+     "price": "364.38",
+     "interpolated": false
+    }
+   },
+   {
+    "quote": {
+     "symbol": "NVDA",
+     "last_trade_price": "218.150000",
+     "previous_close": "223.670000",
+     "has_traded": true,
+     "state": "active"
+    },
+    "close": {
+     "symbol": "NVDA",
+     "price": "223.67",
+     "interpolated": false
+    }
+   },
+   {
+    "quote": {
+     "symbol": "MU",
+     "last_trade_price": "978.160000",
+     "previous_close": "1027.770000",
+     "has_traded": true,
+     "state": "active"
+    },
+    "close": {
+     "symbol": "MU",
+     "price": "1027.77",
+     "interpolated": false
+    }
+   },
+   {
+    "quote": {
+     "symbol": "QQQ",
+     "last_trade_price": "709.670000",
+     "previous_close": "716.310000",
+     "has_traded": true,
+     "state": "active"
+    },
+    "close": {
+     "symbol": "QQQ",
+     "price": "716.31",
+     "interpolated": false
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,62 @@
+{
+ "data": {
+  "results": [
+   {
+    "symbol": "MU",
+    "year": 2026,
+    "quarter": 4,
+    "eps": {
+     "estimate": "31.260000",
+     "actual": null
+    },
+    "report": {
+     "date": "2026-09-30",
+     "timing": "pm",
+     "verified": true
+    }
+   },
+   {
+    "symbol": "DBI",
+    "year": 2026,
+    "quarter": 2,
+    "eps": {
+     "estimate": "0.260000",
+     "actual": "0.340000"
+    },
+    "report": {
+     "date": "2026-09-10",
+     "timing": "am",
+     "verified": true
+    }
+   },
+   {
+    "symbol": "LOVE",
+    "year": 2027,
+    "quarter": 2,
+    "eps": {
+     "estimate": "-0.180000",
+     "actual": "-0.350000"
+    },
+    "report": {
+     "date": "2026-09-10",
+     "timing": "am",
+     "verified": true
+    }
+   },
+   {
+    "symbol": "MCFT",
+    "year": 2026,
+    "quarter": 4,
+    "eps": {
+     "estimate": "0.600000",
+     "actual": "0.670000"
+    },
+    "report": {
+     "date": "2026-09-10",
+     "timing": "am",
+     "verified": true
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "results": [
+      {"symbol": "ADBE", "year": 2026, "quarter": 3, "eps": {"estimate": "5.840000", "actual": null}, "report": {"date": "2026-09-10", "timing": "pm", "verified": true}},
+      {"symbol": "MU", "year": 2026, "quarter": 4, "eps": {"estimate": "31.260000", "actual": null}, "report": {"date": "2026-09-30", "timing": "pm", "verified": true}},
+      {"symbol": "NVDA", "year": 2026, "quarter": 3, "eps": {"estimate": "1.420000", "actual": null}, "report": {"date": "2026-09-12", "timing": "pm", "verified": false}},
+      {"symbol": "COST", "year": 2026, "quarter": 4, "eps": {"estimate": "6.540000", "actual": null}, "report": {"date": "2026-09-24", "timing": "pm", "verified": true}},
+      {"symbol": "AVGO", "year": 2026, "quarter": 3, "eps": {"estimate": "1.700000", "actual": "1.780000"}, "report": {"date": "2026-09-04", "timing": "pm", "verified": true}}
+    ]
+  },
+  "_note": "Hand-built fixture for tests. MU 2026-09-30 is the real upcoming earnings for a pool symbol (verified). NVDA 2026-09-12 row is synthetic+tentative to exercise the verified=false path. AVGO row is synthetic 'already reported' (eps.actual set) to exercise that filter."
+}
