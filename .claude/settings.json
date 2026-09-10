@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__robinhood-trading__get_accounts",
+      "mcp__robinhood-trading__get_portfolio",
+      "mcp__robinhood-trading__get_equity_positions",
+      "mcp__robinhood-trading__get_equity_orders",
+      "mcp__robinhood-trading__get_equity_quotes",
+      "mcp__robinhood-trading__get_equity_historicals",
+      "mcp__robinhood-trading__get_earnings_calendar",
+      "mcp__robinhood-trading__get_earnings_results",
+      "mcp__robinhood-trading__review_equity_order",
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(venv/bin/python3:*)",
+      "Bash(venv/bin/pip:*)",
+      "Bash(python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(mkdir:*)",
+      "Bash(date:*)"
+    ],
+    "deny": [
+      "mcp__robinhood-trading__place_equity_order",
+      "mcp__robinhood-trading__place_crypto_order",
+      "mcp__robinhood-trading__place_option_order",
+      "mcp__robinhood-trading__cancel_equity_order",
+      "mcp__robinhood-trading__cancel_crypto_order",
+      "mcp__robinhood-trading__cancel_option_order",
+      "mcp__robinhood-trading__exercise_option"
+    ]
+  }
+}
