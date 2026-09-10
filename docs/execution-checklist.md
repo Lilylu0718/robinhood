@@ -31,9 +31,23 @@
 - [ ] 核对 MCP 数据质量：`get_equity_historicals` 的 MA 值 vs 别处交叉验证一次
 - [ ] 发现bug回阶段C修，不跳过验证直接上线
 
+### 调度（2026-09 定）
+- 云端 routine **不可行**：自定义 MCP 连接器无 UUID 发现路径、且不会注入云端 agent 会话
+  （claude-code issue #63233 / #42175 / #61196）。
+- 改用**本地 launchd**：`com.lilylu.robinhood-bot.plist` → `run_daily.sh` → `claude --print daily_prompt.md`。
+  工作日 10:00 + 13:15 PT（美东 13:00 / 16:15）。Mac 睡着跳过、醒来补一次。
+- 安装：`cp com.lilylu.robinhood-bot.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.lilylu.robinhood-bot.plist`
+- 想真 24/7：把这套丢到一台常开机器上。
+- `.claude/settings.json` 里 place_/cancel_ 类工具在 `deny`，headless 跑不可能误下单。
+
+### 阶段 D｜纸面验证（跑起来了才算数）
+- [ ] launchd 装好，连续几个交易日 `decisions.csv` / `last_run.md` 有正常输出
+- [ ] 每天看一眼通知/`last_run.md`
+
 ### 阶段 E｜切换真实下单
-- [ ] 定调度方式：cron 跑 `claude -p "跑今天的交易流程"` / `schedule` skill 建 routine / 手动每天触发——选一个
-- [ ] 定 agent 下单模式：每单人工确认 vs 授权自主下单（Robinhood agentic 设置里）
-- [ ] `config.py` 的 `DRY_RUN` 改成 `False`
-- [ ] 上线第一天手动盯着跑一次（`review_equity_order` 的 alert 逐条看）
+- [ ] 纸面 1-2 周干净后再动
+- [ ] 定 agent 下单模式：每单人工确认 vs 授权自主（Robinhood agentic 设置里）
+- [ ] `config.py` 的 `DRY_RUN` 改成 `False`；`daily_prompt.md` 第 3 步补 review→place
+- [ ] `.claude/settings.json` 把 `place_equity_order` 从 deny 挪走（按下单模式决定 allow 还是 ask）
+- [ ] 上线第一天手动盯着跑一次
 - [ ] 进入日常节奏直到满1个月，对照 strategy-design.md 的评估标准复盘
