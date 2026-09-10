@@ -9,7 +9,7 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：D 进行中（纸面验证，DRY_RUN=True；Day 1 = 2026-09-10 已跑，见 decisions.csv）
+- 阶段：D 进行中（纸面验证，DRY_RUN=True）。launchd `com.lilylu.robinhood-bot` 已装，工作日 10:00 + 13:15 PT 自动跑。见 decisions.csv / last_run.md。
 - `config.py` 里 DRY_RUN：True
 
 ## 硬性规则（任何代码修改都不能违反）
