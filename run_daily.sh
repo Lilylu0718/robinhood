@@ -1,9 +1,10 @@
 #!/bin/bash
 # robinhood-bot 每日执行包装脚本。由 launchd 触发。
-# 跑 `claude -p` 执行 daily_prompt.md 的 RUNBOOK，结果记日志 + 桌面通知。
+# 跑 `claude -p` 执行 daily_prompt.md 的 RUNBOOK，结果记日志 + 桌面通知 + 手机推送(ntfy)。
 set -uo pipefail
 
 PROJECT="/Users/lilylu/robinhood-bot"
+NTFY_TOPIC="rhbot-lily-8f3k2p"   # 手机装 ntfy app 订阅这个 topic
 cd "$PROJECT" || exit 1
 
 LOG_DIR="$PROJECT/logs"
@@ -30,11 +31,18 @@ SUMMARY="$(claude --print --permission-mode default \
 
 echo "=== $(date) done ===" | tee -a "$LOG"
 
-# 桌面通知（macOS）。手机推送需要 Remote Control 常驻，另配。
+# 通知：Mac 桌面横幅 + 手机 ntfy 推送
 TITLE="robinhood-bot $(date +%m-%d\ %H:%M)"
-BODY="$(sed -n '1,4p' "$PROJECT/last_run.md" 2>/dev/null | tr '\n' ' ')"
+BODY="$(sed -n '3,12p' "$PROJECT/last_run.md" 2>/dev/null)"
 [ -z "$BODY" ] && BODY="$SUMMARY"
-osascript -e "display notification \"${BODY//\"/\'}\" with title \"$TITLE\"" 2>/dev/null || true
+
+osascript -e "display notification \"$(echo "$BODY" | tr '\n' ' ' | sed 's/"/'"'"'/g')\" with title \"$TITLE\"" 2>/dev/null || true
+
+curl -s --max-time 15 \
+  -H "Title: $TITLE" \
+  -H "Tags: chart_with_upwards_trend" \
+  -d "$BODY" \
+  "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
 
 # 日志保留最近 60 个
 ls -1t "$LOG_DIR"/run-*.log 2>/dev/null | tail -n +61 | xargs -r rm -f
