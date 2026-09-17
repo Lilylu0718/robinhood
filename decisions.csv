@@ -27,3 +27,7 @@ ts_utc,date,symbol,action,signal_reason,risk_approved,risk_reason,order_side,ord
 2026-09-14T20:27:43+00:00,2026-09-14,NVDA,HOLD,未持仓，无金叉（多头排列）| MA10=222.50 MA30=218.97,False,HOLD，不下单,,,,True,,skipped,
 2026-09-14T20:27:43+00:00,2026-09-14,MU,HOLD,未持仓，无金叉（多头排列）| MA10=973.66 MA30=934.81,False,HOLD，不下单,,,,True,,skipped,
 2026-09-14T20:27:43+00:00,2026-09-14,QQQ,HOLD,未持仓，无金叉（空头排列）| MA10=714.49 MA30=715.84,False,HOLD，不下单,,,,True,,skipped,
+2026-09-17T17:04:13+00:00,2026-09-17,AVGO,HOLD,未持仓，无金叉（空头排列）| MA10=356.16 MA30=377.08,False,HOLD，不下单,,,,True,,skipped,
+2026-09-17T17:04:13+00:00,2026-09-17,NVDA,HOLD,未持仓，无金叉（多头排列）| MA10=220.63 MA30=219.56,False,HOLD，不下单,,,,True,,skipped,
+2026-09-17T17:04:13+00:00,2026-09-17,MU,HOLD,未持仓，无金叉（多头排列）| MA10=968.97 MA30=942.57,False,HOLD，不下单,,,,True,,skipped,
+2026-09-17T17:04:13+00:00,2026-09-17,QQQ,HOLD,未持仓，无金叉（空头排列）| MA10=712.25 MA30=716.06,False,HOLD，不下单,,,,True,,skipped,
