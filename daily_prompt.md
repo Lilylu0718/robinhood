@@ -6,6 +6,9 @@
 - 今天日期（美东）：`TZ=America/New_York date +%F`，记为 TODAY。
 
 ## 1. 取数（全部用 robinhood-trading MCP，逐个 try；失败的那项写空文件 `{}` 并继续）
+**连接性重试**：任何一次 MCP 调用失败（DNS 解析失败、socket 被关、超时等连接类错误——不是"账户不对"这种业务错误），
+先等 20 秒重试，最多重试 2 次（合计最多 3 次尝试）。3 次都失败才算这项"拉取失败"。
+`get_accounts` 这步尤其要走满重试再放弃——它是后续账户安全校验的前提。
 把每个返回的完整 JSON 写到项目根的文件里：
 - `get_accounts` → 先确认恰好一个账户 `agentic_allowed=true` 且它的 `account_number` == `config.ACCOUNT_NUMBER`（414480244）。**不一致就停，什么都不做，报告异常。**
 - `get_equity_historicals`（symbols=AVGO,NVDA,MU,QQQ；interval=day；start_time = TODAY 往前 100 天）→ `_hist.json`

@@ -6,8 +6,10 @@
     launchctl load ~/Library/LaunchAgents/com.lilylu.robinhood-bot.plist
   卸载：
     launchctl unload ~/Library/LaunchAgents/com.lilylu.robinhood-bot.plist
-  时间是本机本地时区（America/Los_Angeles）。工作日 10:00 和 13:15 各跑一次
-  （= 美东 13:00 午盘 / 16:15 收盘后）。Mac 睡着时跳过，醒来补跑一次。
+  时间是本机本地时区（America/Los_Angeles）。工作日 13:15 跑一次（= 美东 16:15 收盘后）。
+  2026-09-22 起从每天 2 次减到 1 次：省 Claude 月度用量，且信号本来就是日线收盘算的，
+  10:00 那次盘中检查价值有限。Mac 睡着时跳过，醒来补跑一次。run_daily.sh 内部对单次跑
+  失败有 3 次重试（0s/60s/180s 退避）。
 -->
 <plist version="1.0">
 <dict>
@@ -22,11 +24,6 @@
 
   <key>StartCalendarInterval</key>
   <array>
-    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
-    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
-    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
-    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
-    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>15</integer></dict>
     <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>15</integer></dict>
     <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>15</integer></dict>

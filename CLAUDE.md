@@ -9,7 +9,8 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：D 进行中（纸面验证，DRY_RUN=True）。launchd `com.lilylu.robinhood-bot` 已装，工作日 10:00 + 13:15 PT 自动跑。见 decisions.csv / last_run.md。
+- 阶段：D 进行中（纸面验证，DRY_RUN=True）。launchd `com.lilylu.robinhood-bot` 已装，工作日 13:15 PT 自动跑（2026-09-22 起从 2 次/天减到 1 次，省用量；单次跑内置 3 次重试）。见 decisions.csv / last_run.md。
+- **阶段 E 前要看到的**：① 近期反复出现的 MCP/DNS 连接失败降下来（重试机制已加，观察几天）；② 等到 9-28~30 亲眼看 MU 财报避雷在真实日期触发；③ 目前 12+ 天 MA10/30 策略一次交叉都没触发，BUY/SELL 执行路径还没被真实信号跑过。
 - `config.py` 里 DRY_RUN：True
 - **例外**：2026-09-18 手动做过一次真单冒烟测试（用户明确授权，验证 review→place 全链路），持有 1 股 PURR，成本 $13.80，不在 `config.SYMBOLS` 策略池内。止盈 +5%/止损 -6% 阈值监控见 `daily_prompt.md` 1.5 节；DRY_RUN=True 下止损信号只打印不会真卖，触发时需人工把 `place_equity_order` 从 `.claude/settings.json` 的 `deny` 移出才能下单。卖出后删掉这条和 daily_prompt.md 对应小节。
 
