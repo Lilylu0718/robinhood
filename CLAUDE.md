@@ -11,6 +11,7 @@
 ## 当前状态（每次推进阶段后手动更新这两行）
 - 阶段：D 进行中（纸面验证，DRY_RUN=True）。launchd `com.lilylu.robinhood-bot` 已装，工作日 10:00 + 13:15 PT 自动跑。见 decisions.csv / last_run.md。
 - `config.py` 里 DRY_RUN：True
+- **例外**：2026-09-18 手动做过一次真单冒烟测试（用户明确授权，验证 review→place 全链路），持有 1 股 PURR，成本 $13.80，不在 `config.SYMBOLS` 策略池内。止盈 +5%/止损 -6% 阈值监控见 `daily_prompt.md` 1.5 节；DRY_RUN=True 下止损信号只打印不会真卖，触发时需人工把 `place_equity_order` 从 `.claude/settings.json` 的 `deny` 移出才能下单。卖出后删掉这条和 daily_prompt.md 对应小节。
 
 ## 硬性规则（任何代码修改都不能违反）
 1. 所有 MCP 工具调用（`mcp__robinhood-trading__*`）必须包在 try/except 里；失败时记录日志并跳过这次交易，**禁止用旧数据或默认值强行下单**（接口随时可能变化失效）。

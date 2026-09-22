@@ -15,6 +15,20 @@
 - `get_equity_positions`（414480244）→ `_positions.json`
 - `get_equity_orders`（414480244，created_at_gte=TODAY）→ `_orders.json`
 
+## 1.5 手动测试仓位监控（PURR，只读，不进 strategy.py/风控管道）
+2026-09-18 一次性真单冒烟测试留下的仓位：1股 PURR，成本 $13.80（ref_id b7533b9c-7c4b-45ec-b13d-c8d9bbe85495）。
+它不在 `config.SYMBOLS` 里，`generate_signals` 不会给它 MA 信号；但 `risk.stop_loss_signals` 是遍历所有持仓的，
+所以 -6% 止损**会**被自动检测到——只是 `DRY_RUN=True` 时 executor 只打印不会真的卖，等于没有保护。
+每次跑到这一步：
+- `get_equity_quotes`（PURR）拿现价，算 `pnl_pct = 现价/13.80 - 1`
+- 用 `risk.check_risk(Signal("PURR","HOLD", f"手动测试仓位监控: 现价{px} 成本13.80 盈亏{pnl_pct:+.1%}"), ctx)` 的结果调
+  `logger.log_decision(...)` 落一行到 decisions.csv（不影响 MA 标的池的信号）
+- 在 `last_run.md` 里加一行：现价、盈亏%
+  - `pnl_pct >= 0.05`：标 🎯 已达止盈线(+5%)，建议卖出——需要人工把 `place_equity_order` 从 `.claude/settings.json` 的 `deny` 移出，Claude 才能下单
+  - `pnl_pct <= -0.06`：标 ⚠️ 已达止损线(-6%)，DRY_RUN 下不会自动卖，同样需要人工解锁 `place_equity_order`
+  - 否则不用特别标注，正常报数字即可
+卖出后把这一节从 daily_prompt.md 删掉（仓位已清，不用再监控）。
+
 ## 2. 跑流程
 ```
 venv/bin/python3 run_once.py --historicals _hist.json --earnings _earn.json \
