@@ -59,3 +59,8 @@ ts_utc,date,symbol,action,signal_reason,risk_approved,risk_reason,order_side,ord
 2026-09-23T20:18:10+00:00,2026-09-23,MU,HOLD,未持仓，无金叉（多头排列）| MA10=989.20 MA30=963.25,False,HOLD，不下单,,,,True,,skipped,
 2026-09-23T20:18:10+00:00,2026-09-23,QQQ,BUY,金叉: MA10 上穿 MA30 | MA10=718.56 MA30=717.78,True,开仓 $200.01（目标 20%，仓位上限余量 $250，购买力 $986）,buy,200.01,,True,,dry_run,
 2026-09-23T20:18:20+00:00,2026-09-23,PURR,HOLD,手动测试仓位监控: 现价13.8662 成本13.80 盈亏+0.5%,False,HOLD，不下单,,,,True,,skipped,
+2026-09-24T20:33:00+00:00,2026-09-24,AVGO,HOLD,未持仓，无金叉（空头排列）| MA10=353.34 MA30=366.48,False,HOLD，不下单,,,,True,,skipped,
+2026-09-24T20:33:00+00:00,2026-09-24,NVDA,HOLD,未持仓，无金叉（空头排列）| MA10=219.71 MA30=220.43,False,HOLD，不下单,,,,True,,skipped,
+2026-09-24T20:33:00+00:00,2026-09-24,MU,HOLD,未持仓，无金叉（多头排列）| MA10=993.62 MA30=970.02,False,HOLD，不下单,,,,True,,skipped,
+2026-09-24T20:33:00+00:00,2026-09-24,QQQ,HOLD,未持仓，无金叉（多头排列）| MA10=721.05 MA30=718.54,False,HOLD，不下单,,,,True,,skipped,
+2026-09-24T20:33:08+00:00,2026-09-24,PURR,HOLD,手动测试仓位监控: 现价14.08 成本13.80 盈亏+2.0%,False,HOLD，不下单,,,,True,,skipped,
