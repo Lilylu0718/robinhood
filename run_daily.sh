@@ -14,6 +14,17 @@ LOG="$LOG_DIR/run-$STAMP.log"
 
 echo "=== $(date) start ===" | tee -a "$LOG"
 
+# 一天 3 次，防止上一次还没跑完就叠上来（mkdir 原子锁；超过 2 小时的锁视为残留）
+LOCK="$PROJECT/.run.lock"
+if ! mkdir "$LOCK" 2>/dev/null; then
+  if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +120 2>/dev/null)" ]; then
+    rm -rf "$LOCK"; mkdir "$LOCK"
+  else
+    echo "previous run still in progress, skip" | tee -a "$LOG"; exit 0
+  fi
+fi
+trap 'rm -rf "$LOCK"' EXIT
+
 # 只在美股交易日 + 大致交易时段附近跑（周末直接跳过；launchd 时间点已限制在工作日）
 DOW="$(date +%u)"   # 1=Mon .. 7=Sun
 if [ "$DOW" -gt 5 ]; then

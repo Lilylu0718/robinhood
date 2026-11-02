@@ -9,7 +9,7 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **12:15 PT** 自动跑（收盘 13:00 PT 前，市价单当天成交；单次跑内置 3 次重试）。见 decisions.csv / last_run.md。
+- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **6:45 / 9:45 / 12:15 PT 一天 3 次**（2026-11-02 用户要求；每次都研判+交易，研判笔记在 `research/<日期>.md`；盘中用实时价补当日临时 bar；单次跑内置 3 次重试，`.run.lock` 防重叠）。见 decisions.csv / last_run.md。
 - 上线首周要盯：抄底策略未经回测；真实下单路径（review→place→record_order.py）首次被信号触发。
 - `config.py` 里 DRY_RUN：False
 - **例外**：1 股 PURR（Hyperliquid Strategies，成本 $13.80，2026-09-18 真单冒烟测试买入）。2026-11-02 用户决定**长期持有、不卖**，已加入 `config.LONG_TERM_HOLDS`，止损不再对它生效。

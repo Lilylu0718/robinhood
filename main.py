@@ -27,6 +27,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from datetime import date
 
+import pandas as pd
+
 import config
 import data
 import executor
@@ -85,6 +87,20 @@ def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[s
     return [by_sym[s.symbol] for s in signals]
 
 
+def with_live_bar(dfs: dict, quotes: dict[str, float], today: date) -> dict:
+    """盘中运行：日线最后一根是昨天时，用实时价当作今天的临时收盘补一根，
+    让一天多次运行都基于最新价格算回撤/RSI/MA。"""
+    out = {}
+    for sym, df in dfs.items():
+        px = quotes.get(sym)
+        if px and len(df) and df.index[-1] < today:
+            row = pd.DataFrame({"open": [px], "high": [px], "low": [px], "close": [px], "volume": [0]},
+                               index=[today])
+            df = pd.concat([df, row])
+        out[sym] = df
+    return out
+
+
 def run_pipeline(
     *,
     historicals_resp: dict | None,
@@ -108,6 +124,7 @@ def run_pipeline(
     positions = data.parse_positions(positions_resp)
     quotes = data.parse_quotes(quotes_resp) if quotes_resp else {}
     dfs = _safe(lambda: data.parse_historicals(historicals_resp), "parse_historicals", res.errors) or {}
+    dfs = with_live_bar(dfs, quotes, today)
     earnings = (
         _safe(lambda: data.parse_earnings_calendar(earnings_resp, config.SYMBOLS),
               "parse_earnings", res.errors)
@@ -155,59 +172,6 @@ def run_pipeline(
             bp = ctx.portfolio.buying_power - (rr.dollar_amount or 0.0)
             ctx = replace(ctx, todays_fills=ctx.todays_fills + 1,
                           portfolio=replace(ctx.portfolio, buying_power=bp))
-        state, payload = executor.execute(rr, dry_run=dry_run)
-        if state == "dry_run":
-            res.printed.append(payload)
-            logger.log_decision(rr, dry_run=True, order_state="dry_run")
-        elif state == "skipped":
-            logger.log_decision(rr, dry_run=dry_run, order_state="skipped")
-        elif state == "needs_mcp":
-            res.order_plans.append(payload)
-            # 先落一条 planned 行；Claude 走完 review→place 后再落一条结果行
-            logger.log_decision(rr, dry_run=False, ref_id=payload.ref_id,
-                                order_state="planned")
-
-    return res
-
-    portfolio = data.parse_portfolio(portfolio_resp)
-    positions = data.parse_positions(positions_resp)
-    quotes = data.parse_quotes(quotes_resp) if quotes_resp else {}
-    dfs = _safe(lambda: data.parse_historicals(historicals_resp), "parse_historicals", res.errors) or {}
-    earnings = (
-        _safe(lambda: data.parse_earnings_calendar(earnings_resp, config.SYMBOLS),
-              "parse_earnings", res.errors)
-        or {s: [] for s in config.SYMBOLS}
-    )
-    todays_fills = (
-        _safe(lambda: data.count_todays_fills(orders_resp, today), "count_fills", res.errors)
-        if orders_resp else 0
-    ) or 0
-
-    ctx = RiskContext(
-        portfolio=portfolio,
-        positions=positions,
-        quotes=quotes,
-        todays_fills=todays_fills,
-        daily_pnl_pct=daily_pnl_pct,
-        today=today,
-    )
-
-    # 1) 止损信号优先，且同一标的止损后不再处理 MA 信号
-    stop_signals = stop_loss_signals(ctx)
-    stopped = {s.symbol for s in stop_signals}
-
-    # 2) MA 信号（离场按"持仓 + 空头排列"，入场按"新金叉"）
-    held = set(positions) - stopped
-    ma_signals = [
-        s for s in generate_signals(dfs, earnings, today, held_symbols=held)
-        if s.symbol not in stopped
-    ]
-
-    res.signals = stop_signals + ma_signals
-
-    for sig in res.signals:
-        rr = check_risk(sig, ctx)
-        res.risk_results.append(rr)
         state, payload = executor.execute(rr, dry_run=dry_run)
         if state == "dry_run":
             res.printed.append(payload)

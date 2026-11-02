@@ -14,7 +14,7 @@ import argparse
 import csv
 import json
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import config
@@ -35,11 +35,12 @@ def _load(p: str | None):
         return None
 
 
-def _prev_total_value() -> float | None:
+def _prev_total_value(today: str) -> float | None:
+    """上一个交易日最后一次运行的总值（一天多次运行时，当日盈亏仍相对昨天算）。"""
     f = ROOT / config.EQUITY_CSV
     if not f.exists():
         return None
-    rows = list(csv.DictReader(f.open()))
+    rows = [r for r in csv.DictReader(f.open()) if r.get("date", "") < today]
     if not rows:
         return None
     try:
@@ -68,7 +69,7 @@ def main_cli() -> int:
         return 2
 
     portfolio = parse_portfolio(portfolio_resp)
-    prev = _prev_total_value()
+    prev = _prev_total_value(a.today)
     daily_pnl_pct = 0.0 if not prev else (portfolio.total_value / prev - 1.0)
 
     res = main.run_pipeline(
@@ -87,7 +88,7 @@ def main_cli() -> int:
     logger.log_equity(portfolio, positions)
 
     lines = [
-        f"# robinhood-bot 运行 {a.today}",
+        f"# robinhood-bot 运行 {a.today} {datetime.now().strftime('%H:%M')}",
         "",
         f"DRY_RUN={config.DRY_RUN} | 账户 {config.ACCOUNT_NUMBER} | "
         f"总值 ${portfolio.total_value:.2f} | 当日 {daily_pnl_pct:+.2%}",

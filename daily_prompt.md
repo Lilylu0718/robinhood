@@ -33,6 +33,8 @@
 - `{"symbol": "QQQ", "action": "SKIP", "reason": "..."}` —— 否决某个机械 BUY（任何标的），只在有明确负面证据时用。
 - 绝不写 SELL（系统会拒绝）。不确定就不写。
 研判失败（网络等）就写 `[]` 继续，不影响机械流程。
+**一天跑 3 次（6:45 / 9:45 / 12:15 PT）**：先读 `research/<TODAY>.md`（当天早些时候的研判笔记），已查过的新闻不要重复搜，
+只针对价格有新变化或新消息的标的补查。研判结束把本次要点（每个标的 1-2 行：结论 + 证据 + 时间）**追加**到 `research/<TODAY>.md`。
 
 ## 2. 跑流程
 ```
@@ -59,5 +61,5 @@ venv/bin/python3 run_once.py --historicals _hist.json --earnings _earn.json \
 
 ## 4. 收尾
 - 删除 `_*.json` 临时文件（含 `_order_plans.json`，下完单后）。
-- `git add decisions.csv equity.csv last_run.md && git commit -m "run <TODAY>" && git push`（推失败不算致命，继续）。
+- `git add decisions.csv equity.csv last_run.md research/ && git commit -m "run <TODAY> <HH:MM>" && git push`（推失败不算致命，继续）。
 - 最后输出一段**不超过 8 行**的中文摘要：下了哪些单（含研判理由）+ 核心股研判要点 + 有没有 error。这段会进桌面/手机通知。

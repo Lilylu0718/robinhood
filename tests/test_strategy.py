@@ -114,3 +114,12 @@ def test_judgment_buy_core_only_and_skip():
     ], errs)
     assert [s.action for s in out] == ["BUY", "HOLD", "HOLD"]
     assert out[0].reason.startswith("判断") and len(errs) == 2
+
+
+def test_live_bar_appended_only_when_stale():
+    from main import with_live_bar
+    df = _df(FLAT)                      # 最后一根 2026-02-09
+    out = with_live_bar({"MU": df}, {"MU": 90.0}, date(2026, 2, 10))["MU"]
+    assert len(out) == len(df) + 1 and out["close"].iloc[-1] == 90.0
+    same = with_live_bar({"MU": df}, {"MU": 90.0}, df.index[-1])["MU"]
+    assert len(same) == len(df)
