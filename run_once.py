@@ -57,6 +57,7 @@ def main_cli() -> int:
     ap.add_argument("--positions", required=True)
     ap.add_argument("--orders")
     ap.add_argument("--today", required=True)
+    ap.add_argument("--judgment", help="Claude 研判 JSON：[{symbol, action: BUY|SKIP, reason}]")
     a = ap.parse_args()
 
     today = date.fromisoformat(a.today)
@@ -79,6 +80,7 @@ def main_cli() -> int:
         orders_resp=_load(a.orders),
         today=today,
         daily_pnl_pct=daily_pnl_pct,
+        judgments=_load(a.judgment) or [],
     )
 
     positions = parse_positions(positions_resp)

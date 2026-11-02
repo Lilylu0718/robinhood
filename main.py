@@ -52,6 +52,39 @@ def _safe(fn, label, errors):
         return None
 
 
+def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[str]) -> list[Signal]:
+    """Claude 研判覆盖层。只允许两种动作：
+    - BUY：仅限 config.CORE_SYMBOLS，把该标的的 HOLD 改成 BUY（reason 以"判断:"开头，优先级最高）
+    - SKIP：把任何标的的 BUY 否决成 HOLD
+    永远不能产生 SELL。之后仍然过 check_risk。
+    """
+    by_sym = {s.symbol: s for s in signals}
+    for j in judgments:
+        try:
+            sym, act, why = str(j["symbol"]).upper(), str(j["action"]).upper(), str(j["reason"]).strip()
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"judgment 格式错误: {j!r} ({e})")
+            continue
+        cur = by_sym.get(sym)
+        if cur is None or not why:
+            errors.append(f"judgment 忽略（不在标的池或无理由）: {j!r}")
+            continue
+        if act == "BUY":
+            if sym not in config.CORE_SYMBOLS:
+                errors.append(f"judgment BUY 仅限核心大厂，忽略 {sym}")
+                continue
+            if cur.action == "HOLD":
+                by_sym[sym] = Signal(sym, "BUY", f"判断: {why} | 原: {cur.reason}",
+                                     cur.fast_ma, cur.slow_ma, score=-1.0)
+        elif act == "SKIP":
+            if cur.action == "BUY":
+                by_sym[sym] = Signal(sym, "HOLD", f"判断否决买入: {why} | 原: {cur.reason}",
+                                     cur.fast_ma, cur.slow_ma)
+        else:
+            errors.append(f"judgment 动作只能 BUY/SKIP，忽略 {j!r}")
+    return [by_sym[s.symbol] for s in signals]
+
+
 def run_pipeline(
     *,
     historicals_resp: dict | None,
@@ -63,6 +96,7 @@ def run_pipeline(
     today: date,
     daily_pnl_pct: float,
     dry_run: bool = config.DRY_RUN,
+    judgments: list[dict] | None = None,
 ) -> PipelineResult:
     res = PipelineResult()
 
@@ -105,6 +139,7 @@ def run_pipeline(
                                     avg_costs=avg_costs, quotes=quotes)
         if s.symbol not in stopped
     ]
+    strat_signals = apply_judgments(strat_signals, judgments or [], res.errors)
     # 卖在前（释放额度），BUY 按 score（RSI）从低到高——最超卖的优先吃掉每日交易额度
     order = {"SELL": 0, "BUY": 1, "HOLD": 2}
     strat_signals.sort(key=lambda s: (order.get(s.action, 3),

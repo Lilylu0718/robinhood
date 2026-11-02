@@ -13,11 +13,16 @@ FORBIDDEN_ACCOUNTS = ("624891156", "554410696")
 DRY_RUN = False   # 2026-11-02 用户要求立即真钱交易
 
 # ── 标的池 ───────────────────────────────────────────────────────────
-SYMBOLS = ("AVGO", "NVDA", "MU", "QQQ", "GOOGL", "AAPL")
+# 核心科技大厂：只在低点买入、永不卖出、不止损（2026-11-02 用户要求，看长期价值）。
+# 买入来源：机械抄底信号，或 Claude 每日研判（_judgment.json，见 daily_prompt.md 1.7）。
+CORE_SYMBOLS = ("GOOGL", "AAPL", "NVDA", "AVGO", "MSFT", "AMZN", "META")
+# 卫星仓位：抄底 + 止盈 + 止损，赚波段
+SATELLITE_SYMBOLS = ("MU", "QQQ")
+SYMBOLS = CORE_SYMBOLS + SATELLITE_SYMBOLS
 ETF_SYMBOLS = ("QQQ",)   # ETF 波动小，抄底回撤阈值单独设
 
 # 用户手动指定的长期持有仓位：不进策略池、不触发止损、bot 永不卖出（2026-11-02 用户决定）
-LONG_TERM_HOLDS = ("PURR",)
+LONG_TERM_HOLDS = ("PURR",) + CORE_SYMBOLS
 
 # ── 策略参数（抄底 / 均值回归，2026-11-02 起）──────────────────────────
 DIP_LOOKBACK = 20            # 回撤基准：近 20 个交易日最高收盘
@@ -39,10 +44,12 @@ EARNINGS_TREAT_TENTATIVE_AS_REAL = True
 MAX_POSITION_PCT = 0.25      # 单标的市值 ≤ 组合总值的 25%
 STOP_LOSS_PCT = -0.15        # 持仓浮亏 ≤ -15% 触发止损卖出（抄底需要空间，2026-11-02 用户从 -6% 放宽）
 MAX_DAILY_LOSS_PCT = -0.03   # 当日组合亏损达 -3%，当天停止一切开仓
-MAX_TRADES_PER_DAY = 2       # 当日最多 2 笔成交（买+卖合计）
+MAX_TRADES_PER_DAY = 10      # 2026-11-02 用户取消"每日 2 笔"限制；10 只是防程序失控的保险丝
 
 # 单笔开仓目标金额 = 组合总值 * TARGET_POSITION_PCT（受 MAX_POSITION_PCT 上限约束）
-TARGET_POSITION_PCT = 0.20
+TARGET_POSITION_PCT = 0.20       # 卫星：一次建仓
+CORE_BUY_PCT = 0.10              # 核心：每次买 10%，分批越跌越买
+CORE_ADD_BELOW_COST_PCT = 0.08   # 已持有的核心股，现价比成本再低 ≥8% 才加仓（只在更低处买）
 
 # ── 文件 ─────────────────────────────────────────────────────────────
 DECISIONS_CSV = "decisions.csv"

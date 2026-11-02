@@ -55,27 +55,27 @@ def test_earnings_blackout_suppresses_buy():
 
 
 def test_take_profit_when_holding():
-    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=90.0)
+    s = generate_signal("MU", _df(FLAT), [], D, holding=True, avg_cost=90.0)
     assert s.action == "SELL" and "止盈" in s.reason
 
 
 def test_rebound_exit_when_above_ma_and_profitable():
-    s = generate_signal("NVDA", _df(REBOUND), [], D, holding=True, avg_cost=95.0)
+    s = generate_signal("MU", _df(REBOUND), [], D, holding=True, avg_cost=95.0)
     assert s.action == "SELL" and "反弹完成" in s.reason
 
 
 def test_hold_when_holding_underwater():
-    s = generate_signal("NVDA", _df(CRASH), [], D, holding=True, avg_cost=95.0)
+    s = generate_signal("MU", _df(CRASH), [], D, holding=True, avg_cost=95.0)
     assert s.action == "HOLD" and "等反弹" in s.reason
 
 
 def test_live_price_used_for_pnl():
-    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=100.0, price=111.0)
+    s = generate_signal("MU", _df(FLAT), [], D, holding=True, avg_cost=100.0, price=111.0)
     assert s.action == "SELL" and "止盈" in s.reason
 
 
 def test_holding_without_cost_holds():
-    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=None)
+    s = generate_signal("MU", _df(FLAT), [], D, holding=True, avg_cost=None)
     assert s.action == "HOLD" and "人工" in s.reason
 
 
@@ -87,3 +87,30 @@ def test_insufficient_data_holds():
 def test_missing_data_symbol_holds():
     sigs = generate_signals({}, {}, D, symbols=("NVDA",))
     assert sigs[0].action == "HOLD" and "无价格数据" in sigs[0].reason
+
+
+# ── 核心大厂 ──────────────────────────────────────────────────────────
+def test_core_never_sells_even_with_big_profit():
+    s = generate_signal("GOOGL", _df(FLAT), [], D, holding=True, avg_cost=50.0)
+    assert s.action == "HOLD" and "不卖" in s.reason
+
+
+def test_core_adds_only_well_below_cost():
+    assert generate_signal("GOOGL", _df(CRASH), [], D, holding=True, avg_cost=90.0).action == "HOLD"
+    s = generate_signal("GOOGL", _df(CRASH), [], D, holding=True, avg_cost=100.0)
+    assert s.action == "BUY" and "核心加仓" in s.reason
+
+
+def test_judgment_buy_core_only_and_skip():
+    from main import apply_judgments
+    from strategy import Signal
+    sigs = [Signal("GOOGL", "HOLD", "x"), Signal("MU", "HOLD", "x"), Signal("QQQ", "BUY", "x")]
+    errs = []
+    out = apply_judgments(sigs, [
+        {"symbol": "GOOGL", "action": "BUY", "reason": "财报后错杀"},
+        {"symbol": "MU", "action": "BUY", "reason": "想买"},
+        {"symbol": "QQQ", "action": "SKIP", "reason": "宏观风险"},
+        {"symbol": "GOOGL", "action": "SELL", "reason": "不允许"},
+    ], errs)
+    assert [s.action for s in out] == ["BUY", "HOLD", "HOLD"]
+    assert out[0].reason.startswith("判断") and len(errs) == 2

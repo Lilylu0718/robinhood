@@ -2,7 +2,9 @@
 
 入场（BUY，未持仓）：收盘价较近 DIP_LOOKBACK 日最高收盘回撤 ≥ 阈值（个股 / ETF 分开）
                      且 RSI(14) ≤ DIP_RSI_MAX，且不在财报避雷窗口内。
-离场（SELL，持仓）：浮盈 ≥ TAKE_PROFIT_PCT（止盈），
+核心大厂（config.CORE_SYMBOLS）：永不 SELL；已持有时仅在比成本再低 ≥8% 且仍满足抄底形态时加仓。
+                   另外 Claude 每日研判可额外发起核心股 BUY（run_once.py --judgment）。
+离场（SELL，卫星持仓）：浮盈 ≥ TAKE_PROFIT_PCT（止盈），
                      或 收盘重新站上 MA20 且浮盈 ≥ REBOUND_MIN_PROFIT_PCT（反弹完成）。
 止损由 risk.stop_loss_signals 负责（config.STOP_LOSS_PCT）。
 Signal.score 越小越优先（= RSI），同一天多个 BUY 时 main.py 按它排序，配合每日交易上限。
@@ -73,7 +75,19 @@ def generate_signal(
     base = (f"收盘 {close:.2f} | 距{config.DIP_LOOKBACK}日高 {dd:+.1%} | "
             f"RSI {r:.0f} | MA{config.REBOUND_MA} {ma:.2f}")
 
-    # ── 离场 ──────────────────────────────────────────────────────────
+    th = dip_threshold(symbol)
+    is_dip = dd <= -th and r <= config.DIP_RSI_MAX
+
+    # ── 核心大厂：只买不卖。已持有时只在比成本再低 ≥8% 且仍是抄底形态时加仓 ─────
+    if symbol in config.CORE_SYMBOLS and holding:
+        if not avg_cost or avg_cost <= 0:
+            return Signal(symbol, "HOLD", f"核心持有（无成本价）| {base}", r, ma)
+        pnl = px / avg_cost - 1.0
+        if is_dip and pnl <= -config.CORE_ADD_BELOW_COST_PCT:
+            return Signal(symbol, "BUY", f"核心加仓: 低于成本 {pnl:+.1%} 且抄底形态 | {base}", r, ma, score=r)
+        return Signal(symbol, "HOLD", f"核心长期持有（浮盈 {pnl:+.1%}，不卖）| {base}", r, ma)
+
+    # ── 离场（卫星）──────────────────────────────────────────────────
     if holding:
         if not avg_cost or avg_cost <= 0:
             return Signal(symbol, "HOLD", f"持仓但无成本价，需人工检查 | {base}", r, ma)
@@ -86,8 +100,7 @@ def generate_signal(
         return Signal(symbol, "HOLD", f"持仓等反弹（浮盈 {pnl:+.1%}）| {base}", r, ma)
 
     # ── 入场 ──────────────────────────────────────────────────────────
-    th = dip_threshold(symbol)
-    if dd <= -th and r <= config.DIP_RSI_MAX:
+    if is_dip:
         ev = next_earnings(earnings, today, config.EARNINGS_TREAT_TENTATIVE_AS_REAL)
         if ev is not None:
             days_to = (ev.report_date - today).days

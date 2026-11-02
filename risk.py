@@ -41,7 +41,7 @@ def stop_loss_signals(ctx: RiskContext) -> list[Signal]:
     out = []
     for sym, pos in ctx.positions.items():
         if sym in config.LONG_TERM_HOLDS:
-            continue  # 用户长期持有，不止损
+            continue  # 长期持有（PURR / 核心大厂），不止损
         px = ctx.quotes.get(sym)
         if px is None or pos.average_buy_price <= 0:
             continue
@@ -83,7 +83,7 @@ def check_risk(signal: Signal, ctx: RiskContext) -> RiskResult:
                           "止损清仓" if is_stop_loss else "策略离场清仓")
 
     # signal.action == "BUY"
-    if daily_loss_hit:
+    if daily_loss_hit and signal.symbol not in config.CORE_SYMBOLS:  # 核心大厂大跌日正是买点，不受日亏停开仓约束
         return RiskResult(signal, False, None, None, None,
                           f"当日亏损 {ctx.daily_pnl_pct:+.1%} ≤ {config.MAX_DAILY_LOSS_PCT:.0%}，停止开仓")
 
@@ -101,7 +101,8 @@ def check_risk(signal: Signal, ctx: RiskContext) -> RiskResult:
                           f"{signal.symbol} 已达/接近 {config.MAX_POSITION_PCT:.0%} 仓位上限"
                           f"（现值 {cur_val:.0f} / 总值 {total:.0f}）")
 
-    target = config.TARGET_POSITION_PCT * total
+    pct = config.CORE_BUY_PCT if signal.symbol in config.CORE_SYMBOLS else config.TARGET_POSITION_PCT
+    target = pct * total
     dollars = min(target, cap_room, ctx.portfolio.buying_power)
 
     if dollars <= _min_order_dollars():
@@ -109,5 +110,5 @@ def check_risk(signal: Signal, ctx: RiskContext) -> RiskResult:
                           f"可下单金额 {dollars:.2f} 过小（购买力 {ctx.portfolio.buying_power:.2f}）")
 
     return RiskResult(signal, True, "buy", round(dollars, 2), None,
-                      f"开仓 ${dollars:.2f}（目标 {config.TARGET_POSITION_PCT:.0%}，"
+                      f"买入 ${dollars:.2f}（目标 {pct:.0%}，"
                       f"仓位上限余量 ${cap_room:.0f}，购买力 ${ctx.portfolio.buying_power:.0f}）")
