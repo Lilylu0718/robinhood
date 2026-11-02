@@ -66,7 +66,7 @@ def test_sell_without_position_ignored():
 
 
 def test_stop_loss_triggers_below_threshold():
-    c = ctx(quotes={"NVDA": 100.0}, positions={"NVDA": Position("NVDA", 1.0, 110.0)})
+    c = ctx(quotes={"NVDA": 100.0}, positions={"NVDA": Position("NVDA", 1.0, 120.0)})
     sigs = stop_loss_signals(c)
     assert len(sigs) == 1 and sigs[0].action == "SELL" and "止损" in sigs[0].reason
 
@@ -79,3 +79,8 @@ def test_stop_loss_not_triggered_within_threshold():
 def test_hold_never_orders():
     rr = check_risk(Signal("QQQ", "HOLD", "无交叉"), ctx())
     assert not rr.approved and rr.order_side is None
+
+
+def test_long_term_hold_never_stopped_out():
+    c = ctx(quotes={"PURR": 5.0}, positions={"PURR": Position("PURR", 1.0, 13.8)})
+    assert stop_loss_signals(c) == []

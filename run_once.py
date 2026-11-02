@@ -100,12 +100,20 @@ def main_cli() -> int:
         elif rr.approved and rr.order_side == "sell":
             extra = f" → SELL {rr.quantity} 股"
         lines.append(f"- {mark} **{s.symbol} {s.action}**{extra} — {s.reason}")
-        if rr.approved:
+        if rr.approved or s.action != "HOLD":
             lines.append(f"    风控: {rr.reason}")
     if res.errors:
         lines += ["", "## errors", *[f"- {e}" for e in res.errors]]
+    plans_file = ROOT / "_order_plans.json"
     if res.order_plans:
-        lines += ["", f"## ⚠️ {len(res.order_plans)} 个 order_plan（DRY_RUN 下不应出现）"]
+        if config.DRY_RUN:
+            lines += ["", f"## ⚠️ {len(res.order_plans)} 个 order_plan（DRY_RUN 下不应出现）"]
+        else:
+            lines += ["", f"## 待执行订单 {len(res.order_plans)} 笔（见 _order_plans.json，Claude 走 review→place）"]
+            plans_file.write_text(json.dumps(
+                [p.as_mcp_kwargs() for p in res.order_plans], indent=2, ensure_ascii=False))
+    elif plans_file.exists():
+        plans_file.unlink()
 
     report = "\n".join(lines)
     (ROOT / "last_run.md").write_text(report + "\n")

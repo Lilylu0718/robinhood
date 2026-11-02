@@ -1,20 +1,19 @@
 from datetime import date
 
 import pandas as pd
-import pytest
 
-import config
 from data import EarningsEvent
-from strategy import generate_signal, _ma_cross
+from strategy import generate_signal, generate_signals, indicators
 
-# 交叉发生在最后一根 bar：前 40 根平在 100（快线=慢线），最后一根跳变。
-GOLDEN = [100.0] * 40 + [102.0]
-DEATH = [100.0] * 40 + [98.0]
-FLAT = [100.0] * 41
-# 空头排列但交叉早已发生（不是最后一根）
-BELOW_NO_CROSS = [100.0] * 20 + [90.0] * 21
-# 多头排列但金叉早已发生
-ABOVE_NO_CROSS = [90.0] * 20 + [100.0] * 21
+# 30 天平在 100，然后 10 天每天跌 1.5% → 回撤 ~14%，RSI 很低
+CRASH = [100.0] * 30 + [100.0 * (0.985 ** i) for i in range(1, 11)]
+FLAT = [100.0] * 40
+# 小跌 3%：回撤不够
+SMALL_DIP = [100.0] * 30 + [100.0 - 0.3 * i for i in range(1, 11)]
+# 先跌后反弹到 MA20 之上
+REBOUND = [100.0] * 30 + [90.0] * 5 + [100.0] * 5
+
+D = date(2026, 2, 10)
 
 
 def _df(closes):
@@ -23,86 +22,68 @@ def _df(closes):
                          "close": closes, "volume": [1] * len(closes)}, index=idx)
 
 
-D = date(2026, 2, 10)
+def test_indicators_on_crash():
+    c, dd, r, ma = indicators(_df(CRASH)["close"])
+    assert dd < -0.13 and r < 20 and c < ma
 
 
-# ── _ma_cross ────────────────────────────────────────────────────────
-def test_golden_cross_detected():
-    cross, f, s = _ma_cross(pd.Series(GOLDEN), config.MA_FAST, config.MA_SLOW)
-    assert cross == "golden" and f > s
+def test_buy_on_deep_oversold_dip():
+    s = generate_signal("NVDA", _df(CRASH), [], D)
+    assert s.action == "BUY" and "抄底" in s.reason and s.score is not None
 
 
-def test_death_cross_detected():
-    cross, f, s = _ma_cross(pd.Series(DEATH), config.MA_FAST, config.MA_SLOW)
-    assert cross == "death" and f < s
+def test_no_buy_when_flat():
+    assert generate_signal("NVDA", _df(FLAT), [], D).action == "HOLD"
 
 
-def test_no_cross_on_flat():
-    assert _ma_cross(pd.Series(FLAT), config.MA_FAST, config.MA_SLOW)[0] == "none"
+def test_no_buy_when_dip_too_small_for_stock():
+    s = generate_signal("NVDA", _df(SMALL_DIP), [], D)
+    assert s.action == "HOLD" and "回撤未到" in s.reason
 
 
-def test_below_no_cross_is_none():
-    assert _ma_cross(pd.Series(BELOW_NO_CROSS), config.MA_FAST, config.MA_SLOW)[0] == "none"
-
-
-# ── 入场（未持仓）：事件驱动，只认新金叉 ─────────────────────────────
-def test_buy_on_fresh_golden_cross():
-    sig = generate_signal("NVDA", _df(GOLDEN), [], D, holding=False)
-    assert sig.action == "BUY" and "金叉" in sig.reason
-
-
-def test_no_buy_when_above_but_no_fresh_cross():
-    sig = generate_signal("NVDA", _df(ABOVE_NO_CROSS), [], D, holding=False)
-    assert sig.action == "HOLD" and "无金叉" in sig.reason
-
-
-def test_no_action_when_below_and_not_holding():
-    sig = generate_signal("NVDA", _df(BELOW_NO_CROSS), [], D, holding=False)
-    assert sig.action == "HOLD"
+def test_etf_uses_smaller_threshold():
+    # 回撤 ~6%，RSI 低：个股不买，QQQ 买
+    six = [100.0] * 30 + [100.0 - 0.6 * i for i in range(1, 11)]
+    assert generate_signal("NVDA", _df(six), [], D).action == "HOLD"
+    assert generate_signal("QQQ", _df(six), [], D).action == "BUY"
 
 
 def test_earnings_blackout_suppresses_buy():
-    df = _df(GOLDEN)
-    today = df.index[-1]
-    ev = [EarningsEvent("NVDA", date(today.year, today.month, today.day), "pm", True, False)]
-    sig = generate_signal("NVDA", df, ev, today, holding=False)
-    assert sig.action == "HOLD" and "财报避雷" in sig.reason
+    ev = [EarningsEvent("NVDA", date(2026, 2, 11), "pm", True, False)]
+    s = generate_signal("NVDA", _df(CRASH), ev, D)
+    assert s.action == "HOLD" and "财报避雷" in s.reason
 
 
-def test_tentative_earnings_respected_when_configured(monkeypatch):
-    df = _df(GOLDEN)
-    today = df.index[-1]
-    ev = [EarningsEvent("NVDA", date(today.year, today.month, today.day), "pm", False, False)]
-    monkeypatch.setattr(config, "EARNINGS_TREAT_TENTATIVE_AS_REAL", True)
-    assert generate_signal("NVDA", df, ev, today, holding=False).action == "HOLD"
-    monkeypatch.setattr(config, "EARNINGS_TREAT_TENTATIVE_AS_REAL", False)
-    assert generate_signal("NVDA", df, ev, today, holding=False).action == "BUY"
+def test_take_profit_when_holding():
+    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=90.0)
+    assert s.action == "SELL" and "止盈" in s.reason
 
 
-# ── 离场（持仓）：状态驱动，MA10 < MA30 就走 ─────────────────────────
-def test_sell_when_holding_and_fresh_death_cross():
-    sig = generate_signal("MU", _df(DEATH), [], D, holding=True)
-    assert sig.action == "SELL" and "死叉离场" in sig.reason
+def test_rebound_exit_when_above_ma_and_profitable():
+    s = generate_signal("NVDA", _df(REBOUND), [], D, holding=True, avg_cost=95.0)
+    assert s.action == "SELL" and "反弹完成" in s.reason
 
 
-def test_sell_when_holding_and_below_even_without_fresh_cross():
-    sig = generate_signal("MU", _df(BELOW_NO_CROSS), [], D, holding=True)
-    assert sig.action == "SELL" and "空头排列离场" in sig.reason
+def test_hold_when_holding_underwater():
+    s = generate_signal("NVDA", _df(CRASH), [], D, holding=True, avg_cost=95.0)
+    assert s.action == "HOLD" and "等反弹" in s.reason
 
 
-def test_hold_when_holding_and_still_bullish():
-    sig = generate_signal("MU", _df(ABOVE_NO_CROSS), [], D, holding=True)
-    assert sig.action == "HOLD" and "续持" in sig.reason
+def test_live_price_used_for_pnl():
+    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=100.0, price=111.0)
+    assert s.action == "SELL" and "止盈" in s.reason
 
 
-def test_earnings_blackout_does_not_block_exit():
-    df = _df(DEATH)
-    today = df.index[-1]
-    ev = [EarningsEvent("MU", date(today.year, today.month, today.day), "pm", True, False)]
-    sig = generate_signal("MU", df, ev, today, holding=True)
-    assert sig.action == "SELL"
+def test_holding_without_cost_holds():
+    s = generate_signal("NVDA", _df(FLAT), [], D, holding=True, avg_cost=None)
+    assert s.action == "HOLD" and "人工" in s.reason
 
 
 def test_insufficient_data_holds():
-    sig = generate_signal("AVGO", _df([100.0] * 10), [], D)
-    assert sig.action == "HOLD" and "数据不足" in sig.reason
+    s = generate_signal("NVDA", _df([100.0] * 10), [], D)
+    assert s.action == "HOLD" and "数据不足" in s.reason
+
+
+def test_missing_data_symbol_holds():
+    sigs = generate_signals({}, {}, D, symbols=("NVDA",))
+    assert sigs[0].action == "HOLD" and "无价格数据" in sigs[0].reason

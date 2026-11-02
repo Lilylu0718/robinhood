@@ -40,6 +40,8 @@ def stop_loss_signals(ctx: RiskContext) -> list[Signal]:
     """持仓浮亏触及 STOP_LOSS_PCT 的，生成强制 SELL 信号（优先于 MA 信号）。"""
     out = []
     for sym, pos in ctx.positions.items():
+        if sym in config.LONG_TERM_HOLDS:
+            continue  # 用户长期持有，不止损
         px = ctx.quotes.get(sym)
         if px is None or pos.average_buy_price <= 0:
             continue
@@ -78,7 +80,7 @@ def check_risk(signal: Signal, ctx: RiskContext) -> RiskResult:
             return RiskResult(signal, False, None, None, None,
                               "无持仓，SELL 信号忽略")
         return RiskResult(signal, True, "sell", None, pos.quantity,
-                          "止损清仓" if is_stop_loss else "死叉清仓")
+                          "止损清仓" if is_stop_loss else "策略离场清仓")
 
     # signal.action == "BUY"
     if daily_loss_hit:

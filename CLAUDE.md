@@ -9,10 +9,10 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：D 进行中（纸面验证，DRY_RUN=True）。launchd `com.lilylu.robinhood-bot` 已装，工作日 13:15 PT 自动跑（2026-09-22 起从 2 次/天减到 1 次，省用量；单次跑内置 3 次重试）。见 decisions.csv / last_run.md。
-- **阶段 E 前要看到的**：① 近期反复出现的 MCP/DNS 连接失败降下来（重试机制已加，观察几天）；② 等到 9-28~30 亲眼看 MU 财报避雷在真实日期触发；③ 目前 12+ 天 MA10/30 策略一次交叉都没触发，BUY/SELL 执行路径还没被真实信号跑过。
-- `config.py` 里 DRY_RUN：True
-- **例外**：2026-09-18 手动做过一次真单冒烟测试（用户明确授权，验证 review→place 全链路），持有 1 股 PURR，成本 $13.80，不在 `config.SYMBOLS` 策略池内。止盈 +5%/止损 -6% 阈值监控见 `daily_prompt.md` 1.5 节；DRY_RUN=True 下止损信号只打印不会真卖，触发时需人工把 `place_equity_order` 从 `.claude/settings.json` 的 `deny` 移出才能下单。卖出后删掉这条和 daily_prompt.md 对应小节。
+- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **12:15 PT** 自动跑（收盘 13:00 PT 前，市价单当天成交；单次跑内置 3 次重试）。见 decisions.csv / last_run.md。
+- 上线首周要盯：抄底策略未经回测；真实下单路径（review→place→record_order.py）首次被信号触发。
+- `config.py` 里 DRY_RUN：False
+- **例外**：1 股 PURR（Hyperliquid Strategies，成本 $13.80，2026-09-18 真单冒烟测试买入）。2026-11-02 用户决定**长期持有、不卖**，已加入 `config.LONG_TERM_HOLDS`，止损不再对它生效。
 
 ## 硬性规则（任何代码修改都不能违反）
 1. 所有 MCP 工具调用（`mcp__robinhood-trading__*`）必须包在 try/except 里；失败时记录日志并跳过这次交易，**禁止用旧数据或默认值强行下单**（接口随时可能变化失效）。
@@ -24,7 +24,7 @@
 7. `.env` 不进 git。MCP 的 OAuth token 由 Claude Code 自己管理，不出现在代码/对话/日志里。本项目已不需要任何 Robinhood 账号密码。
 
 ## 风控参数（数值见 config.py，推导理由见 docs/strategy-design.md）
-单标的仓位 ≤25% ｜ 止损 -6% ｜ 单日最大亏损 -3% ｜ 单日最多2笔交易
+单标的仓位 ≤25% ｜ 止损 -15% ｜ 单日最大亏损 -3% ｜ 单日最多2笔交易
 
 ## 文件结构
 ```
@@ -48,12 +48,12 @@ main.py     # 每日主流程编排（见"运行模型"）
 调度方式（cron 触发 `claude -p` 还是别的）在阶段 E 定，见 execution-checklist.md。
 
 ## 当前策略版本
-技术面 MA10/MA30 + 财报避雷（财报前2天不开仓）。标的池：AVGO / NVDA / MU / QQQ。
-- **入场**（事件驱动）：仅"刚发生金叉"那根 bar 买入，不追高。
-- **离场**（状态驱动）：持仓且 MA10 < MA30 就清仓，不等新死叉。
-- **止损**（优先级最高）：持仓浮亏 ≤ -6% 强制清仓，用实时价，不受频率限制。
-数据全部来自 MCP：价格 `get_equity_historicals`，财报 `get_earnings_calendar` / `get_earnings_results`，新闻 `get_equity_news`。**不再依赖 yfinance / Finnhub / 任何外部 API key。**
-新闻情绪层仅每日生成参考，不接入自动决策。完整设计理由见 `docs/strategy-design.md`（只在需要调整策略逻辑时读）。
+**抄底 / 均值回归**（2026-11-02 起，替换原 MA10/MA30 趋势策略；用户偏好追跌抄底）。标的池：AVGO / NVDA / MU / QQQ / GOOGL / AAPL。
+- **入场**：较 20 日最高收盘回撤 ≥8%（QQQ ≥5%）且 RSI(14) ≤40，不在财报前 2 天。同日多个信号按 RSI 从低到高，受每日 2 笔上限约束。
+- **离场**：浮盈 ≥+10% 止盈；或站回 MA20 且浮盈 ≥+3%。
+- **止损**（优先级最高）：浮盈 ≤ -15% 清仓。`config.LONG_TERM_HOLDS`（PURR）永不止损/卖出。
+- 不把"发布会必跌"之类的事件规律当作信号（不可靠）。
+数据全部来自 MCP。新闻情绪层不接入自动决策。`docs/strategy-design.md` 描述的是旧 MA 策略的设计讨论。
 
 ## 按需读取（不要默认加载，用到时才读）
 - `docs/account-setup.md` — MCP 接入、账户确认、认证方式，仅当 MCP/账户相关出问题时读

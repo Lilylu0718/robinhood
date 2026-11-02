@@ -9,16 +9,26 @@ ACCOUNT_NUMBER = "414480244"
 FORBIDDEN_ACCOUNTS = ("624891156", "554410696")
 
 # ── 运行开关 ─────────────────────────────────────────────────────────
-# True：executor 只打印，绝不调用真实下单工具。切 False 前走完阶段 D。
-DRY_RUN = True
+# True：executor 只打印，绝不调用真实下单工具。
+DRY_RUN = False   # 2026-11-02 用户要求立即真钱交易
 
 # ── 标的池 ───────────────────────────────────────────────────────────
-SYMBOLS = ("AVGO", "NVDA", "MU", "QQQ")
+SYMBOLS = ("AVGO", "NVDA", "MU", "QQQ", "GOOGL", "AAPL")
+ETF_SYMBOLS = ("QQQ",)   # ETF 波动小，抄底回撤阈值单独设
 
-# ── 策略参数 ─────────────────────────────────────────────────────────
-MA_FAST = 10          # 快线周期（日）
-MA_SLOW = 30          # 慢线周期（日）
-HIST_LOOKBACK_DAYS = 90   # 拉多少日历天的日线（要 ≥ MA_SLOW + 交叉判断余量）
+# 用户手动指定的长期持有仓位：不进策略池、不触发止损、bot 永不卖出（2026-11-02 用户决定）
+LONG_TERM_HOLDS = ("PURR",)
+
+# ── 策略参数（抄底 / 均值回归，2026-11-02 起）──────────────────────────
+DIP_LOOKBACK = 20            # 回撤基准：近 20 个交易日最高收盘
+DIP_DRAWDOWN_STOCK = 0.08    # 个股：较 20 日高回撤 ≥ 8% 才算"底"
+DIP_DRAWDOWN_ETF = 0.05      # ETF：≥ 5%
+RSI_PERIOD = 14
+DIP_RSI_MAX = 40             # 且 RSI(14) ≤ 40（超卖）
+REBOUND_MA = 20              # 反弹到 MA20 视为均值回归完成
+TAKE_PROFIT_PCT = 0.10       # 浮盈 ≥ 10% 止盈
+REBOUND_MIN_PROFIT_PCT = 0.03  # 站回 MA20 时浮盈 ≥ 3% 才走
+HIST_LOOKBACK_DAYS = 90      # 拉多少日历天的日线
 
 # 财报避雷：财报日前 N 个自然日内不开新仓（不影响平仓/止损）
 EARNINGS_BLACKOUT_DAYS = 2
@@ -27,7 +37,7 @@ EARNINGS_TREAT_TENTATIVE_AS_REAL = True
 
 # ── 风控参数（推导理由见 docs/strategy-design.md）─────────────────────
 MAX_POSITION_PCT = 0.25      # 单标的市值 ≤ 组合总值的 25%
-STOP_LOSS_PCT = -0.06        # 持仓浮亏 ≤ -6% 触发止损卖出
+STOP_LOSS_PCT = -0.15        # 持仓浮亏 ≤ -15% 触发止损卖出（抄底需要空间，2026-11-02 用户从 -6% 放宽）
 MAX_DAILY_LOSS_PCT = -0.03   # 当日组合亏损达 -3%，当天停止一切开仓
 MAX_TRADES_PER_DAY = 2       # 当日最多 2 笔成交（买+卖合计）
 
