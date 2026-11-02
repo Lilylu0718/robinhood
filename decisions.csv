@@ -199,3 +199,11 @@ ts_utc,date,symbol,action,signal_reason,risk_approved,risk_reason,order_side,ord
 2026-10-30T21:26:32+00:00,2026-10-30,NVDA,HOLD,未持仓，无金叉（空头排列）| MA10=215.58 MA30=224.25,False,HOLD，不下单,,,,True,,skipped,
 2026-10-30T21:26:32+00:00,2026-10-30,MU,HOLD,未持仓，无金叉（空头排列）| MA10=907.75 MA30=995.82,False,HOLD，不下单,,,,True,,skipped,
 2026-10-30T21:26:32+00:00,2026-10-30,QQQ,HOLD,未持仓，无金叉（空头排列）| MA10=715.43 MA30=733.88,False,HOLD，不下单,,,,True,,skipped,
+2026-11-02T20:15:55+00:00,2026-11-02,GOOGL,BUY,抄底: 回撤 ≥ 8% 且 RSI ≤ 40 | 收盘 279.84 | 距20日高 -20.9% | RSI 22 | MA20 333.91,True,开仓 $199.22（目标 20%，仓位上限余量 $249，购买力 $986）,buy,199.22,,False,1e1d38a2-800a-49c0-935d-a5aeb1b8d95a,planned,
+2026-11-02T20:15:55+00:00,2026-11-02,QQQ,BUY,抄底: 回撤 ≥ 5% 且 RSI ≤ 40 | 收盘 690.49 | 距20日高 -9.1% | RSI 35 | MA20 728.19,True,开仓 $199.22（目标 20%，仓位上限余量 $249，购买力 $787）,buy,199.22,,False,633e65fa-eb35-4568-b8e1-31ce9059ee5d,planned,
+2026-11-02T20:15:55+00:00,2026-11-02,NVDA,BUY,抄底: 回撤 ≥ 8% 且 RSI ≤ 40 | 收盘 204.64 | 距20日高 -14.5% | RSI 35 | MA20 221.46,False,当日已成交 2 笔，达上限 2,,,,False,,skipped,
+2026-11-02T20:15:55+00:00,2026-11-02,AVGO,HOLD,未持仓，不抄（RSI 未到 40）| 收盘 326.08 | 距20日高 -13.4% | RSI 41 | MA20 345.70,False,HOLD，不下单,,,,False,,skipped,
+2026-11-02T20:15:55+00:00,2026-11-02,MU,HOLD,未持仓，不抄（RSI 未到 40）| 收盘 884.74 | 距20日高 -18.7% | RSI 41 | MA20 950.61,False,HOLD，不下单,,,,False,,skipped,
+2026-11-02T20:15:55+00:00,2026-11-02,AAPL,HOLD,未持仓，不抄（回撤未到 8%、RSI 未到 40）| 收盘 344.63 | 距20日高 -1.2% | RSI 56 | MA20 342.08,False,HOLD，不下单,,,,False,,skipped,
+2026-11-02T20:16:12+00:00,2026-11-02,GOOGL,BUY,下单结果回填,,,buy,,,False,1e1d38a2-800a-49c0-935d-a5aeb1b8d95a,unconfirmed,预估 $199.22 @~282.56 (~0.705020股); alerts: 无; order_id 6ae8ef85-a07f-477a-aaf3-d0b8dab0aa84
+2026-11-02T20:16:12+00:00,2026-11-02,QQQ,BUY,下单结果回填,,,buy,,,False,633e65fa-eb35-4568-b8e1-31ce9059ee5d,unconfirmed,预估 $199.22 @~684.91 (~0.290880股); alerts: 无; order_id 6ae8ef88-8866-40ac-bfe4-6d33af0b6bf9
