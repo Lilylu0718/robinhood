@@ -22,7 +22,8 @@ SYMBOLS = CORE_SYMBOLS + SATELLITE_SYMBOLS
 ETF_SYMBOLS = ("QQQ",)   # ETF 波动小，抄底回撤阈值单独设
 
 # 用户手动指定的长期持有仓位：不进策略池、不触发止损、bot 永不卖出（2026-11-02 用户决定）
-LONG_TERM_HOLDS = ("PURR",) + CORE_SYMBOLS
+# MU：2026-11-05 用户要求保留，不止损（仍是卫星，止盈/反弹离场照常）
+LONG_TERM_HOLDS = ("PURR", "MU") + CORE_SYMBOLS
 
 # ── 策略参数（抄底 / 均值回归，2026-11-02 起）──────────────────────────
 DIP_LOOKBACK = 20            # 回撤基准：近 20 个交易日最高收盘

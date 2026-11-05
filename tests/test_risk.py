@@ -66,7 +66,7 @@ def test_sell_without_position_ignored():
 
 
 def test_stop_loss_triggers_below_threshold():
-    c = ctx(quotes={"MU": 100.0}, positions={"MU": Position("MU", 1.0, 120.0)})
+    c = ctx(quotes={"QQQ": 100.0}, positions={"QQQ": Position("QQQ", 1.0, 120.0)})
     sigs = stop_loss_signals(c)
     assert len(sigs) == 1 and sigs[0].action == "SELL" and "止损" in sigs[0].reason
 
@@ -95,3 +95,8 @@ def test_core_buy_sized_smaller_and_ignores_daily_loss():
     c = ctx(daily_pnl_pct=-0.05, quotes={"GOOGL": 100.0})
     rr = check_risk(Signal("GOOGL", "BUY", "抄底"), c)
     assert rr.approved and rr.dollar_amount == 100.0
+
+
+def test_mu_kept_no_stop_loss():
+    c = ctx(quotes={"MU": 600.0}, positions={"MU": Position("MU", 1.0, 854.0)})
+    assert stop_loss_signals(c) == []
