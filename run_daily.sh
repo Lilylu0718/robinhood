@@ -43,9 +43,20 @@ TODAY_LOCAL="$(date +%Y-%m-%d)"
 LAST_RUN_MD="$PROJECT/last_run.md"
 PREV_MTIME="$(stat -f %m "$LAST_RUN_MD" 2>/dev/null || echo 0)"
 
+# 整个脚本期间阻止 Mac 闲置睡眠（11-03 早上跑到一半睡着，拖了 2.5 小时）。合盖+电池时仍会强制睡。
+caffeinate -i -w $$ &
+
+# 刚从睡眠唤醒时网络可能还没恢复（11-05 12:00 ENOTFOUND）：最多等 10 分钟网络就绪
+for n in $(seq 1 40); do
+  curl -s --max-time 5 -o /dev/null https://api.anthropic.com && break
+  [ "$n" -eq 1 ] && echo "--- network not ready, waiting up to 10 min ---" | tee -a "$LOG"
+  sleep 15
+done
+
 MAX_ATTEMPTS=3
 BACKOFFS=(0 60 180)   # 秒：第1次不等，第2次等60s，第3次等180s
 SUCCESS=0
+AUTH_FAIL=0
 SUMMARY=""
 
 for i in $(seq 1 $MAX_ATTEMPTS); do
@@ -59,6 +70,13 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
 
   SUMMARY="$(claude --print --permission-mode default \
     "$(cat "$PROJECT/daily_prompt.md")" 2>&1 | tee -a "$LOG" | tail -n 12)"
+
+  # 登录过期重试也没用（11-04~05 白白失败 6 次）：立刻停，推送提醒重新登录
+  if echo "$SUMMARY" | grep -qE "Failed to authenticate|OAuth session expired|Please run /login"; then
+    AUTH_FAIL=1
+    echo "--- auth expired, stop retrying ---" | tee -a "$LOG"
+    break
+  fi
 
   NEW_MTIME="$(stat -f %m "$LAST_RUN_MD" 2>/dev/null || echo 0)"
   if [ "$NEW_MTIME" != "$PREV_MTIME" ] && head -1 "$LAST_RUN_MD" 2>/dev/null | grep -q "$TODAY_LOCAL"; then
@@ -79,6 +97,9 @@ echo "=== $(date) done (success=$SUCCESS) ===" | tee -a "$LOG"
 if [ "$SUCCESS" -eq 1 ]; then
   TITLE="robinhood-bot $(date +%m-%d\ %H:%M)"
   BODY="$(sed -n '3,12p' "$PROJECT/last_run.md" 2>/dev/null)"
+elif [ "$AUTH_FAIL" -eq 1 ]; then
+  TITLE="🔑 robinhood-bot 需要重新登录 $(date +%m-%d\ %H:%M)"
+  BODY="Claude 登录过期，这次没交易。打开终端运行 claude，输入 /login，下一次定时运行会自动恢复。"
 else
   TITLE="⛔ robinhood-bot 今天没跑成 $(date +%m-%d\ %H:%M)"
   BODY="重试 $MAX_ATTEMPTS 次都没写出今天的 last_run.md，多半是 MCP/网络连接问题。看 $LOG"
