@@ -14,7 +14,7 @@ DOW="$(date +%u)"; HM="$(date +%H%M)"
 # 防止两个盯盘叠在一起
 WLOCK="$PROJECT/.watch.lock"
 if ! mkdir "$WLOCK" 2>/dev/null; then
-  [ -n "$(find "$WLOCK" -maxdepth 0 -mmin +25 2>/dev/null)" ] && { rm -rf "$WLOCK"; mkdir "$WLOCK"; } || exit 0
+  [ -n "$(find "$WLOCK" -maxdepth 0 -mmin +14 2>/dev/null)" ] && { rm -rf "$WLOCK"; mkdir "$WLOCK"; } || exit 0
 fi
 trap 'rm -rf "$WLOCK"' EXIT
 caffeinate -i -w $$ &

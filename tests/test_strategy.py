@@ -101,19 +101,31 @@ def test_core_adds_only_well_below_cost():
     assert s.action == "BUY" and "核心加仓" in s.reason
 
 
-def test_judgment_buy_core_only_and_skip():
+def test_judgment_buy_skip_and_satellite_sell():
     from main import apply_judgments
     from strategy import Signal
     sigs = [Signal("GOOGL", "HOLD", "x"), Signal("MU", "HOLD", "x"), Signal("QQQ", "BUY", "x")]
     errs = []
     out = apply_judgments(sigs, [
         {"symbol": "GOOGL", "action": "BUY", "reason": "财报后错杀"},
-        {"symbol": "MU", "action": "BUY", "reason": "想买"},
+        {"symbol": "MU", "action": "BUY", "reason": "错杀"},
         {"symbol": "QQQ", "action": "SKIP", "reason": "宏观风险"},
-        {"symbol": "GOOGL", "action": "SELL", "reason": "不允许"},
+        {"symbol": "GOOGL", "action": "SELL", "reason": "核心不许卖"},
+        {"symbol": "TSLA", "action": "BUY", "reason": "不在池"},
     ], errs)
-    assert [s.action for s in out] == ["BUY", "HOLD", "HOLD"]
+    assert [s.action for s in out] == ["BUY", "BUY", "HOLD"]
     assert out[0].reason.startswith("判断") and len(errs) == 2
+
+
+def test_judgment_sell_only_held_satellite_not_long_term():
+    from main import apply_judgments
+    from strategy import Signal
+    sigs = [Signal("QQQ", "HOLD", "x"), Signal("MU", "HOLD", "x"), Signal("NVDA", "HOLD", "x")]
+    j = [{"symbol": s, "action": "SELL", "reason": "论点破了"} for s in ("QQQ", "MU", "NVDA")]
+    errs = []
+    out = apply_judgments(sigs, j, errs, held={"QQQ", "MU", "NVDA"})
+    assert [s.action for s in out] == ["SELL", "HOLD", "HOLD"] and len(errs) == 2
+    assert apply_judgments(sigs, j[:1], [], held=set())[0].action == "HOLD"
 
 
 def test_live_bar_appended_only_when_stale():

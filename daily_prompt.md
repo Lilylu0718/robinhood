@@ -12,7 +12,7 @@
 **如果 Robinhood 工具提示需要认证/授权（OAuth 过期、要求 /mcp），重试没用：立刻停，并在输出里单独打印一行 `RH_MCP_AUTH_EXPIRED`。**
 把每个返回的完整 JSON 写到项目根的文件里：
 - `get_accounts` → 先确认恰好一个账户 `agentic_allowed=true` 且它的 `account_number` == `config.ACCOUNT_NUMBER`（414480244）。**不一致就停，什么都不做，报告异常。**
-- `get_equity_historicals`（symbols= `config.SYMBOLS` 全部（目前 GOOGL,AAPL,NVDA,AVGO,MSFT,AMZN,META,MU,QQQ）；interval=day；start_time = TODAY 往前 100 天）→ `_hist.json`
+- `get_equity_historicals`（symbols= `config.SYMBOLS` 全部（用 `venv/bin/python3 -c 'import config;print(",".join(config.SYMBOLS))'` 取，池子每周会扩，**不要用记忆里的旧列表**）；interval=day；start_time = TODAY 往前 100 天）→ `_hist.json`
 - `get_earnings_calendar`（start_date=TODAY，days=31）→ `_earn.json`
 - `get_equity_quotes`（`config.SYMBOLS` 全部）→ `_quotes.json`
 - `get_portfolio`（414480244）→ `_portfolio.json`
@@ -27,7 +27,11 @@
 用户原话（2026-11-12）："不要死板地看规则……要你有私人的判断加上去。" 机械抄底（回撤+RSI）只负责**提名**，买不买由你决定。
 用户投资观：科技大厂（`config.CORE_SYMBOLS`）长期价值好，在真正的低点买、买了不卖；"跌的趋势如果还有救，可以等一等再抄底"。
 
-**先读 `research/views.md`**（跨天的持续判断，例如"NVDA 等财报+管理层明朗前不加仓"）。没有新证据推翻它，就照它执行。
+**先读（都可能不存在，缺了就跳过）**：
+- `research/views.md`：跨天的持续判断（例如"NVDA 等财报+管理层明朗前不加仓"）。没有新证据推翻它，就照它执行。
+- `research/lessons.md`：每周复盘总结的教训。**每条都要遵守**，它们来自真实亏损。
+- `research/buy_zones.json` + `research/theses/<SYM>.md`：每只股票的投资档案和预设买入区间。价格进入买入区间且无新的负面消息 → 倾向 BUY；远高于合理价值的卫星仓 → 考虑 SELL。
+- `research/pool.json`：本周扩进来的卫星候选，含入池理由。
 
 用 `_hist.json` 算**池里每只股票**（核心 + 卫星）距 20 日高回撤、RSI、现价 vs 成本。凡是**回撤 ≥5%、或现价低于成本、或最近有大新闻**的，都必须研判（这覆盖了所有可能被机械 BUY 的标的）：
 - 数据：`get_equity_analyst_ratings`、`get_equity_fundamentals`（PE、52 周区间）、`get_earnings_results`、`get_earnings_calendar`，以及 `WebSearch` 查最近 1 周新闻。哪个失败就跳过它，用剩下的判断。
@@ -41,10 +45,18 @@
 输出 `_judgment.json`（JSON 数组）：
 - `{"symbol": "AMZN", "action": "BUY", "reason": "<含具体证据：跌因、跌幅、PE、新闻>"}` —— 仅限核心股，"今天是值得买的低点"。已持有的核心股只在现价比成本低 ≥8% 时才值得再 BUY。
 - `{"symbol": "NVDA", "action": "SKIP", "reason": "..."}` —— 否决机械 BUY（任何标的）。**只要你判断现在不是好时机就写 SKIP，不需要"铁证"**；对每个研判过且结论是"等"的标的都写上。
-- 绝不写 SELL（系统会拒绝）。研判彻底失败（网络等）就写 `[]` 继续。
+- `{"symbol": "CRM", "action": "SELL", "reason": "..."}` —— **只限已持有的卫星仓**（不含核心大厂 / MU / PURR，这些永不卖，系统会拒绝）。用于：入池论点被证伪、出现基本面恶化、或价格已远超档案里的合理价值。固定的止盈 +10% / 止损 -15% 仍自动生效，你可以更早走。
+- 池内任何标的都可 BUY（不只核心）。已持有的只在现价比成本低 ≥8% 时才值得再 BUY。
+- 研判彻底失败（网络等）就写 `[]` 继续。
+
+**多角度研判（会真正下单的决定必须做）**：如果你打算写 BUY 或 SELL，或者机械信号要买某只股票而你倾向放行，先用 Agent 工具**并行**开 2 个子 agent（同一条消息里发出）：
+- 看多 agent：「为 <SYM> 现在买入/持有找最强的理由，用 WebSearch 查最近 2 周新闻、分析师观点、估值。给出证据和信心。」
+- 看空 agent：「为 <SYM> 现在不该买/该卖找最强的理由，同样查证。重点：公司自身风险是否落地、是否还在加速下跌、财报临近。」
+你综合两边 + 档案 + lessons 做最终决定，把双方要点各一句写进 reason 和 research 笔记。一次运行最多为 4 只股票开这种对辩，挑最接近要下单的。只是维持 HOLD 的不用开。
 
 **一天跑 3 次（6:45 / 9:45 / 12:15 PT）**：先读 `research/<TODAY>.md`（当天早些时候的笔记），已查过的不要重复搜，只补查有新变化的标的。
 结束时：把本次要点（每个标的 1-2 行：结论 + 证据 + 时间）**追加**到 `research/<TODAY>.md`；如果形成或推翻了**跨天**的判断（"等到 X 之后再看"），同步更新 `research/views.md`（写明日期、理由、什么条件下解除）。
+如果有重大新消息改变了某只股票的合理价值或买入条件，同步更新 `research/theses/<SYM>.md` 和 `research/buy_zones.json` 里它的条目（`buy_below` / `paused` / `note` / `updated`）。
 
 ## 2. 跑流程
 ```

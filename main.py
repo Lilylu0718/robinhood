@@ -54,12 +54,15 @@ def _safe(fn, label, errors):
         return None
 
 
-def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[str]) -> list[Signal]:
-    """Claude 研判覆盖层。只允许两种动作：
-    - BUY：仅限 config.CORE_SYMBOLS，把该标的的 HOLD 改成 BUY（reason 以"判断:"开头，优先级最高）
+def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[str],
+                    held: set[str] | None = None) -> list[Signal]:
+    """Claude 研判覆盖层（2026-11-12 起 Claude 是决策者，机械信号只是提名）：
+    - BUY：池内任何标的，HOLD → BUY（reason 以"判断:"开头，优先级最高）
     - SKIP：把任何标的的 BUY 否决成 HOLD
-    永远不能产生 SELL。之后仍然过 check_risk。
+    - SELL：仅限已持有的卫星仓，且不在 LONG_TERM_HOLDS（核心大厂 / MU / PURR 永不卖）
+    之后仍然过 check_risk。
     """
+    held = held or set()
     by_sym = {s.symbol: s for s in signals}
     for j in judgments:
         try:
@@ -72,9 +75,6 @@ def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[s
             errors.append(f"judgment 忽略（不在标的池或无理由）: {j!r}")
             continue
         if act == "BUY":
-            if sym not in config.CORE_SYMBOLS:
-                errors.append(f"judgment BUY 仅限核心大厂，忽略 {sym}")
-                continue
             if cur.action == "HOLD":
                 by_sym[sym] = Signal(sym, "BUY", f"判断: {why} | 原: {cur.reason}",
                                      cur.fast_ma, cur.slow_ma, score=-1.0)
@@ -82,8 +82,16 @@ def apply_judgments(signals: list[Signal], judgments: list[dict], errors: list[s
             if cur.action == "BUY":
                 by_sym[sym] = Signal(sym, "HOLD", f"判断否决买入: {why} | 原: {cur.reason}",
                                      cur.fast_ma, cur.slow_ma)
+        elif act == "SELL":
+            if sym in config.LONG_TERM_HOLDS or sym not in config.SATELLITE_SYMBOLS:
+                errors.append(f"judgment SELL 不允许（核心/长期持有永不卖）：{sym}")
+            elif sym not in held:
+                errors.append(f"judgment SELL 忽略（未持有）：{sym}")
+            elif cur.action != "SELL":
+                by_sym[sym] = Signal(sym, "SELL", f"判断卖出: {why} | 原: {cur.reason}",
+                                     cur.fast_ma, cur.slow_ma)
         else:
-            errors.append(f"judgment 动作只能 BUY/SKIP，忽略 {j!r}")
+            errors.append(f"judgment 动作只能 BUY/SKIP/SELL，忽略 {j!r}")
     return [by_sym[s.symbol] for s in signals]
 
 
@@ -156,7 +164,7 @@ def run_pipeline(
                                     avg_costs=avg_costs, quotes=quotes)
         if s.symbol not in stopped
     ]
-    strat_signals = apply_judgments(strat_signals, judgments or [], res.errors)
+    strat_signals = apply_judgments(strat_signals, judgments or [], res.errors, held=held)
     # 卖在前（释放额度），BUY 按 score（RSI）从低到高——最超卖的优先吃掉每日交易额度
     order = {"SELL": 0, "BUY": 1, "HOLD": 2}
     strat_signals.sort(key=lambda s: (order.get(s.action, 3),

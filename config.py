@@ -17,7 +17,30 @@ DRY_RUN = False   # 2026-11-02 用户要求立即真钱交易
 # 买入来源：机械抄底信号，或 Claude 每日研判（_judgment.json，见 daily_prompt.md 1.7）。
 CORE_SYMBOLS = ("GOOGL", "AAPL", "NVDA", "AVGO", "MSFT", "AMZN", "META")
 # 卫星仓位：抄底 + 止盈 + 止损，赚波段
-SATELLITE_SYMBOLS = ("MU", "QQQ")
+BASE_SATELLITES = ("MU", "QQQ")
+# 动态扩池（2026-11-12 用户同意扩到优质大盘股）：每周五复盘任务从纳斯达克100/标普100 里挑"好公司被错杀"的候选，
+# 写进 research/pool.json；这里自动读进来当卫星。上限 MAX_EXTRA_SATELLITES 只，防失控。
+MAX_EXTRA_SATELLITES = 8
+POOL_FILE = __import__("pathlib").Path(__file__).parent / "research" / "pool.json"
+
+
+def _load_extra_satellites() -> tuple[str, ...]:
+    import json
+    import re
+    try:
+        rows = json.loads(POOL_FILE.read_text()).get("satellites", [])
+    except Exception:  # noqa: BLE001  文件缺失/损坏 → 只用基础池
+        return ()
+    out = []
+    for r in rows:
+        sym = str(r.get("symbol", "")).upper().strip()
+        if re.fullmatch(r"[A-Z]{1,5}(\.[A-Z])?", sym) and sym not in CORE_SYMBOLS + BASE_SATELLITES + ("PURR",) \
+                and sym not in out:
+            out.append(sym)
+    return tuple(out[:MAX_EXTRA_SATELLITES])
+
+
+SATELLITE_SYMBOLS = BASE_SATELLITES + _load_extra_satellites()
 SYMBOLS = CORE_SYMBOLS + SATELLITE_SYMBOLS
 ETF_SYMBOLS = ("QQQ",)   # ETF 波动小，抄底回撤阈值单独设
 

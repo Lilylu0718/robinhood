@@ -9,7 +9,7 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **6:45 / 9:45 / 12:15 PT 一天 3 次**（2026-11-02 用户要求；每次都研判+交易，研判笔记在 `research/<日期>.md`；盘中用实时价补当日临时 bar；单次跑内置 3 次重试，`.run.lock` 防重叠）。另有盯盘 `com.lilylu.robinhood-bot-watch`（2026-11-12 起，每 30 分钟，`watch.sh` + `watch_prompt.md` + `watch_check.py`，只读；盘中涨跌 ≥4% 或 `research/views.md` 关注标的有新消息 → 追加一次完整运行）。见 decisions.csv / last_run.md。
+- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **6:45 / 9:45 / 12:15 PT 一天 3 次**（2026-11-02 用户要求；每次都研判+交易，研判笔记在 `research/<日期>.md`；盘中用实时价补当日临时 bar；单次跑内置 3 次重试，`.run.lock` 防重叠）。另有盯盘 `com.lilylu.robinhood-bot-watch`（2026-11-12 起，每 15 分钟，`watch.sh` + `watch_prompt.md` + `watch_check.py`，只读；盘中涨跌 ≥4%、价格进入 `research/buy_zones.json` 买入区间、或 `research/views.md` 关注标的有新消息 → 追加一次完整运行）。每周五 13:30 `com.lilylu.robinhood-bot-weekly`（`weekly.sh` + `weekly_prompt.md`）：复盘写 `research/reviews/`+`lessons.md`，扫描纳指100/标普100 扩池写 `research/pool.json`（≤8 只卫星，config 自动读入），子 agent 并行更新 `research/theses/<SYM>.md` + `buy_zones.json`。见 decisions.csv / last_run.md。
 - 上线首周要盯：抄底策略未经回测；真实下单路径（review→place→record_order.py）首次被信号触发。
 - `config.py` 里 DRY_RUN：False
 - **例外**：1 股 PURR（Hyperliquid Strategies，成本 $13.80，2026-09-18 真单冒烟测试买入）。2026-11-02 用户决定**长期持有、不卖**，已加入 `config.LONG_TERM_HOLDS`，止损不再对它生效。
@@ -52,6 +52,7 @@ main.py     # 每日主流程编排（见"运行模型"）
 - 买入来源：① 机械抄底（距 20 日高回撤 ≥8% 且 RSI ≤40）；② Claude 每日研判（daily_prompt 1.7，查新闻/评级/估值，写 `_judgment.json`，只能 BUY 核心股或 SKIP 否决，不能 SELL）。
 - 每次买 10% 总值，单只 ≤25%；已持有的只在比成本再低 ≥8% 时加仓。大跌日不受 -3% 日亏停开仓约束。
 **卫星（`SATELLITE_SYMBOLS`：MU/QQQ）——抄底 + 止盈 +10% / 站回 MA20 且 ≥+3% 离场 + 止损 -15%。**每次建仓 20%。**MU 2026-11-05 起用户要求保留、不止损**（止盈/反弹离场仍有效）。
+**2026-11-12 起 Claude 是决策者**（用户："不要死板看规则"、"完全自主"）：机械信号只是提名；`_judgment.json` 可 BUY 池内任何标的、SKIP 任何买入、SELL 已持有的卫星仓（核心/MU/PURR 永不卖）。会下单的决定先开看多/看空子 agent 对辩。
 **PURR**：长期持有不卖。每日交易笔数上限已取消（保留 10 笔作防失控保险丝）。财报前 2 天不开新仓。
 不把"发布会必跌"之类伪规律当信号。`docs/strategy-design.md` 是旧 MA 策略的设计讨论。
 
