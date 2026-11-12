@@ -6,3 +6,5 @@ __pycache__/
 logs/
 _*.json
 .run.lock
+research/watch_state.json
+.watch.lock
