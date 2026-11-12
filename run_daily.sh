@@ -105,7 +105,7 @@ if [ "$SUCCESS" -eq 1 ]; then
   BODY="$(sed -n '3,12p' "$PROJECT/last_run.md" 2>/dev/null)"
 elif [ "$AUTH_FAIL" -eq 2 ]; then
   TITLE="🔑 robinhood-bot 需要重新授权 Robinhood $(date +%m-%d\ %H:%M)"
-  BODY="robinhood-trading MCP 授权过期，这次没交易。打开终端运行 claude，输入 /mcp 重新认证 robinhood-trading。"
+  BODY="claude.ai 的 Robinhood 连接器授权过期，这次没交易。到 claude.ai → 设置 → 连接器，重新连接 Robinhood。"
 elif [ "$AUTH_FAIL" -eq 1 ]; then
   TITLE="🔑 robinhood-bot 需要重新登录 $(date +%m-%d\ %H:%M)"
   BODY="Claude 登录过期，这次没交易。打开终端运行 claude，输入 /login，下一次定时运行会自动恢复。"

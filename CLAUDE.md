@@ -3,7 +3,7 @@
 本金 $1000（独立 Agentic 实验账户 `414480244`，昵称 "Agentic"），全自动下单，观察窗口 ≤1个月。
 
 ## 交易通道：官方 Robinhood Agentic Trading MCP
-- MCP server：`https://agent.robinhood.com/mcp/trading`（`claude mcp add robinhood-trading ...`，`/mcp` 认证）
+- MCP server：`https://agent.robinhood.com/mcp/trading`（2026-11-12 起用 claude.ai 连接器 "robinhood"，在 claude.ai 设置→连接器里授权；本地 robinhood-trading 已删除，因为同 URL 会挡住 claude.ai 连接器）
 - 官方授权、不违反 ToS。**已弃用 `robin_stocks`**（逆向库，见 git 历史）。
 - MCP 工具只在 Claude Agent 会话里可用，普通 `python xxx.py` 脚本调不到。因此本项目的"运行时"是一个按计划触发的 Claude Code 会话（见下"运行模型"），不是 headless cron 脚本。
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
@@ -15,7 +15,7 @@
 - **例外**：1 股 PURR（Hyperliquid Strategies，成本 $13.80，2026-09-18 真单冒烟测试买入）。2026-11-02 用户决定**长期持有、不卖**，已加入 `config.LONG_TERM_HOLDS`，止损不再对它生效。
 
 ## 硬性规则（任何代码修改都不能违反）
-1. 所有 MCP 工具调用（`mcp__robinhood-trading__*`）必须包在 try/except 里；失败时记录日志并跳过这次交易，**禁止用旧数据或默认值强行下单**（接口随时可能变化失效）。
+1. 所有 MCP 工具调用（`mcp__claude_ai_robinhood__*`）必须包在 try/except 里；失败时记录日志并跳过这次交易，**禁止用旧数据或默认值强行下单**（接口随时可能变化失效）。
 2. 任何 BUY/SELL 信号下单前必须先过 `risk.py` 的 `check_risk()`。
 3. 下单只能针对 `config.ACCOUNT_NUMBER`（= `414480244`）。下单前先用 `get_accounts` 确认该账户 `agentic_allowed=true`；若返回的可交易账户不是 `414480244`，**中止，不下单**（防止误碰其它账户）。
 4. `DRY_RUN=True` 时，`executor.py` 只能打印，不能调用 `place_equity_order` / `place_crypto_order` / `place_option_order`。

@@ -1,18 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "mcp__robinhood-trading__get_accounts",
-      "mcp__robinhood-trading__get_portfolio",
-      "mcp__robinhood-trading__get_equity_positions",
-      "mcp__robinhood-trading__get_equity_orders",
-      "mcp__robinhood-trading__get_equity_quotes",
-      "mcp__robinhood-trading__get_equity_historicals",
-      "mcp__robinhood-trading__get_earnings_calendar",
-      "mcp__robinhood-trading__get_earnings_results",
-      "mcp__robinhood-trading__review_equity_order",
-      "mcp__robinhood-trading__place_equity_order",
-      "mcp__robinhood-trading__get_equity_analyst_ratings",
-      "mcp__robinhood-trading__get_equity_fundamentals",
+      "mcp__claude_ai_robinhood__get_accounts",
+      "mcp__claude_ai_robinhood__get_portfolio",
+      "mcp__claude_ai_robinhood__get_equity_positions",
+      "mcp__claude_ai_robinhood__get_equity_orders",
+      "mcp__claude_ai_robinhood__get_equity_quotes",
+      "mcp__claude_ai_robinhood__get_equity_historicals",
+      "mcp__claude_ai_robinhood__get_earnings_calendar",
+      "mcp__claude_ai_robinhood__get_earnings_results",
+      "mcp__claude_ai_robinhood__review_equity_order",
+      "mcp__claude_ai_robinhood__place_equity_order",
+      "mcp__claude_ai_robinhood__get_equity_analyst_ratings",
+      "mcp__claude_ai_robinhood__get_equity_fundamentals",
       "WebSearch",
       "WebFetch",
       "Read",
@@ -32,12 +32,12 @@
       "Bash(date:*)"
     ],
     "deny": [
-      "mcp__robinhood-trading__place_crypto_order",
-      "mcp__robinhood-trading__place_option_order",
-      "mcp__robinhood-trading__cancel_equity_order",
-      "mcp__robinhood-trading__cancel_crypto_order",
-      "mcp__robinhood-trading__cancel_option_order",
-      "mcp__robinhood-trading__exercise_option"
+      "mcp__claude_ai_robinhood__place_crypto_order",
+      "mcp__claude_ai_robinhood__place_option_order",
+      "mcp__claude_ai_robinhood__cancel_equity_order",
+      "mcp__claude_ai_robinhood__cancel_crypto_order",
+      "mcp__claude_ai_robinhood__cancel_option_order",
+      "mcp__claude_ai_robinhood__exercise_option"
     ]
   }
 }
