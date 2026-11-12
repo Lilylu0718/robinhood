@@ -9,6 +9,7 @@
 **连接性重试**：任何一次 MCP 调用失败（DNS 解析失败、socket 被关、超时等连接类错误——不是"账户不对"这种业务错误），
 先等 20 秒重试，最多重试 2 次（合计最多 3 次尝试）。3 次都失败才算这项"拉取失败"。
 `get_accounts` 这步尤其要走满重试再放弃——它是后续账户安全校验的前提。
+**如果 robinhood-trading 工具提示需要认证/授权（OAuth 过期、要求 /mcp），重试没用：立刻停，并在输出里单独打印一行 `RH_MCP_AUTH_EXPIRED`。**
 把每个返回的完整 JSON 写到项目根的文件里：
 - `get_accounts` → 先确认恰好一个账户 `agentic_allowed=true` 且它的 `account_number` == `config.ACCOUNT_NUMBER`（414480244）。**不一致就停，什么都不做，报告异常。**
 - `get_equity_historicals`（symbols= `config.SYMBOLS` 全部（目前 GOOGL,AAPL,NVDA,AVGO,MSFT,AMZN,META,MU,QQQ）；interval=day；start_time = TODAY 往前 100 天）→ `_hist.json`

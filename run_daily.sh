@@ -77,6 +77,12 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
     echo "--- auth expired, stop retrying ---" | tee -a "$LOG"
     break
   fi
+  # Robinhood MCP 授权过期（11-10~12 每次白跑 3 遍）：同样立刻停
+  if grep -q "RH_MCP_AUTH_EXPIRED" "$LOG"; then
+    AUTH_FAIL=2
+    echo "--- auth expired, stop retrying ---" | tee -a "$LOG"
+    break
+  fi
 
   NEW_MTIME="$(stat -f %m "$LAST_RUN_MD" 2>/dev/null || echo 0)"
   if [ "$NEW_MTIME" != "$PREV_MTIME" ] && head -1 "$LAST_RUN_MD" 2>/dev/null | grep -q "$TODAY_LOCAL"; then
@@ -97,6 +103,9 @@ echo "=== $(date) done (success=$SUCCESS) ===" | tee -a "$LOG"
 if [ "$SUCCESS" -eq 1 ]; then
   TITLE="robinhood-bot $(date +%m-%d\ %H:%M)"
   BODY="$(sed -n '3,12p' "$PROJECT/last_run.md" 2>/dev/null)"
+elif [ "$AUTH_FAIL" -eq 2 ]; then
+  TITLE="🔑 robinhood-bot 需要重新授权 Robinhood $(date +%m-%d\ %H:%M)"
+  BODY="robinhood-trading MCP 授权过期，这次没交易。打开终端运行 claude，输入 /mcp 重新认证 robinhood-trading。"
 elif [ "$AUTH_FAIL" -eq 1 ]; then
   TITLE="🔑 robinhood-bot 需要重新登录 $(date +%m-%d\ %H:%M)"
   BODY="Claude 登录过期，这次没交易。打开终端运行 claude，输入 /login，下一次定时运行会自动恢复。"
