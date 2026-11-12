@@ -32,6 +32,12 @@ if [ "$DOW" -gt 5 ]; then
   exit 0
 fi
 
+# 开盘时段保持清醒到 13:45 PT（盯盘每 15 分钟一次，中间不能睡着）。每天只起一个，13:45 自动结束。
+END_S=$(date -j -f "%H:%M:%S" "13:45:00" +%s 2>/dev/null); NOW_S=$(date +%s)
+if [ -n "$END_S" ] && [ "$END_S" -gt "$NOW_S" ] && ! pgrep -f "caffeinate -i -t" >/dev/null; then
+  nohup caffeinate -i -t $((END_S - NOW_S)) >/dev/null 2>&1 &
+fi
+
 # 拉最新代码（策略/配置可能在别处改过）
 git pull --quiet --rebase 2>&1 | tee -a "$LOG" || true
 

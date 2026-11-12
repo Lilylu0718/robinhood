@@ -18,6 +18,11 @@ if ! mkdir "$WLOCK" 2>/dev/null; then
 fi
 trap 'rm -rf "$WLOCK"' EXIT
 caffeinate -i -w $$ &
+# 若早上的完整运行没跑（例如登录问题），盯盘也负责保持清醒到 13:45
+END_S=$(date -j -f "%H:%M:%S" "13:45:00" +%s 2>/dev/null); NOW_S=$(date +%s)
+if [ -n "$END_S" ] && [ "$END_S" -gt "$NOW_S" ] && ! pgrep -f "caffeinate -i -t" >/dev/null; then
+  nohup caffeinate -i -t $((END_S - NOW_S)) >/dev/null 2>&1 &
+fi
 
 LOG_DIR="$PROJECT/logs"; mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/watch-$(date +%Y%m%d-%H%M).log"
