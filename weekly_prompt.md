@@ -5,8 +5,8 @@
 要 Claude 有自己的判断，不死板看规则；小票/卫星"赚钱即可"。不要用"发布会必跌"之类伪规律。
 
 ## 0. 准备
-- `date` 取 TODAY；`venv/bin/python3 -c 'import config;print(",".join(config.SYMBOLS))'` 取当前池。
-- robinhood 连接器（`mcp__claude_ai_robinhood__*`）：`get_accounts`（确认 414480244 agentic_allowed=true，否则停）、`get_portfolio` / `get_equity_positions`（414480244）、
+- `[ -d venv ] || python3 -m venv venv; venv/bin/pip install -q -r requirements.txt`（云端是全新环境）。`date` 取 TODAY（**用 `TZ=America/Los_Angeles date`**）；`venv/bin/python3 -c 'import config;print(",".join(config.SYMBOLS))'` 取当前池。
+- Robinhood 连接器（本机前缀 `mcp__claude_ai_robinhood__`，云端前缀 `mcp__robinhood__`）：`get_accounts`（确认 414480244 agentic_allowed=true，否则停）、`get_portfolio` / `get_equity_positions`（414480244）、
   `get_equity_historicals`（池 + PURR，interval=day，近 260 天）、`get_equity_fundamentals`、`get_equity_analyst_ratings`、`get_earnings_calendar`（未来 30 天）。
   合并写进 `_weekly_data.json`（只保留子 agent 需要的：每只的近 1 年收盘序列摘要（52 周高低、距 20/60 日高回撤、近 5 日走势）、PE、市值、分析师评级/目标价、财报日、持仓成本）。
 - 如果 robinhood 工具提示需要认证/授权：打印 `RH_MCP_AUTH_EXPIRED` 并停止。

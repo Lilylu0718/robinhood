@@ -2,7 +2,7 @@
 交易只在完整运行（daily_prompt.md）里做；你的工作是判断**要不要现在追加一次完整运行**。
 
 1. `date` 取 TODAY（YYYY-MM-DD）和当前 PT 时间。
-2. 用 claude.ai robinhood 连接器 `mcp__claude_ai_robinhood__get_equity_quotes`，symbols = `config.SYMBOLS` + `PURR`
+2. 用 Robinhood 连接器的 `get_equity_quotes`（本机前缀 `mcp__claude_ai_robinhood__`，云端前缀 `mcp__robinhood__`），symbols = `config.SYMBOLS` + `PURR`
    （用 `venv/bin/python3 -c 'import config;print(",".join(config.SYMBOLS))'` 取，池子每周会变）。原样写入 `_watch_quotes.json`。失败重试一次，仍失败 → 输出 `WATCH_TRIGGER: no (quotes failed)` 结束。
 3. `venv/bin/python3 watch_check.py --quotes _watch_quotes.json --today <TODAY>` → 得到异动候选（MOVE 行）和买入区间命中（ZONE 行：价格跌进了投资档案预设的买入区间）。
 4. 读 `research/buy_zones.json`、`research/views.md`（跨天持续判断，含各标的的"解除条件"）和 `research/<TODAY>.md`（今天已有的研判，可能不存在）。

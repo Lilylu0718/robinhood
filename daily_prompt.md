@@ -2,10 +2,10 @@
 
 ## 0. 前置
 - 读 `CLAUDE.md` 和 `config.py`。确认 `DRY_RUN`。
-- 确认 venv：`venv/bin/python3 -c "import pandas"`，报错就 `venv/bin/pip install -q -r requirements.txt`。
+- 确认 venv：`venv/bin/python3 -c "import pandas"`，报错就 `[ -d venv ] || python3 -m venv venv; venv/bin/pip install -q -r requirements.txt`（云端每次都是全新环境）。
 - 今天日期（美东）：`TZ=America/New_York date +%F`，记为 TODAY。
 
-## 1. 取数（全部用 claude.ai robinhood 连接器（工具名 mcp__claude_ai_robinhood__*），逐个 try；失败的那项写空文件 `{}` 并继续）
+## 1. 取数（全部用 Robinhood 连接器（工具名在本机是 `mcp__claude_ai_robinhood__*`，在云端是 `mcp__robinhood__*`，用你能看到的那个；文中写的工具名省略前缀），逐个 try；失败的那项写空文件 `{}` 并继续）
 **连接性重试**：任何一次 MCP 调用失败（DNS 解析失败、socket 被关、超时等连接类错误——不是"账户不对"这种业务错误），
 先等 20 秒重试，最多重试 2 次（合计最多 3 次尝试）。3 次都失败才算这项"拉取失败"。
 `get_accounts` 这步尤其要走满重试再放弃——它是后续账户安全校验的前提。
