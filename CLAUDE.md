@@ -9,7 +9,7 @@
 - 三个账户里 **只有 `414480244` 的 `agentic_allowed=true`**，我只能对它下单。主账户 `624891156`、"Summer fling" `554410696` 我只读、永不下单。
 
 ## 当前状态（每次推进阶段后手动更新这两行）
-- 阶段：E 真钱交易（2026-11-02 起，用户要求立即上线，跳过了原定的纸面验证门槛）。launchd `com.lilylu.robinhood-bot` 工作日 **6:45 / 9:45 / 12:15 PT 一天 3 次**（2026-11-02 用户要求；每次都研判+交易，研判笔记在 `research/<日期>.md`；盘中用实时价补当日临时 bar；单次跑内置 3 次重试，`.run.lock` 防重叠）。另有盯盘 `com.lilylu.robinhood-bot-watch`（2026-11-12 起，每 15 分钟，`watch.sh` + `watch_prompt.md` + `watch_check.py`，只读；盘中涨跌 ≥4%、价格进入 `research/buy_zones.json` 买入区间、或 `research/views.md` 关注标的有新消息 → 追加一次完整运行）。每周五 13:30 `com.lilylu.robinhood-bot-weekly`（`weekly.sh` + `weekly_prompt.md`）：复盘写 `research/reviews/`+`lessons.md`，扫描纳指100/标普100 扩池写 `research/pool.json`（≤8 只卫星，config 自动读入），子 agent 并行更新 `research/theses/<SYM>.md` + `buy_zones.json`。见 decisions.csv / last_run.md。
+- 阶段：E 真钱交易。**2026-11-12 起在 Anthropic 云端运行**（不再依赖 Mac）：routine `robinhood-bot hourly (trade)`（trig_014vq1Txca5Z9szr595Eg9qN，cron `45 14-20 * * 1-5` UTC = 工作日 6:45–12:45 PST 每小时一次完整研判+交易）和 `robinhood-bot weekly (review+scan)`（trig_01GNT4sVd62xjyAtfqBhe3MX，周五 13:30 PST）。入口 `cloud_run.md`；云端工具前缀 `mcp__robinhood__`；ntfy 被云端网络拦截，通知走 Claude App 推送。Mac 上的 launchd 任务已全部 unload（保留脚本作备用，勿与云端同时开）。**夏令时（2027-03-14 起）cron 要改成 `45 13-19 * * 1-5` 和 `30 20 * * 5`。**
 - 上线首周要盯：抄底策略未经回测；真实下单路径（review→place→record_order.py）首次被信号触发。
 - `config.py` 里 DRY_RUN：False
 - **例外**：1 股 PURR（Hyperliquid Strategies，成本 $13.80，2026-09-18 真单冒烟测试买入）。2026-11-02 用户决定**长期持有、不卖**，已加入 `config.LONG_TERM_HOLDS`，止损不再对它生效。
