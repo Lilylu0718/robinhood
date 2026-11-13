@@ -1,11 +1,9 @@
-# Cloud smoke test — 2026-11-12 19:39:54 UTC
+# Cloud smoke test — 2026-11-13 07:01 UTC
 
-| # | Check | Result | Detail |
-|---|---|---|---|
-| 1 | git | PASS | main @ 8514650 "Cloud-ready prompts: connector-name agnostic, fresh-env venv setup, cloud_run.md wrapper" |
-| 2 | python | PASS | 50 passed in 0.42s |
-| 3 | config | PASS | DRY_RUN=False, SYMBOLS=GOOGL AAPL NVDA AVGO MSFT AMZN META MU QQQ |
-| 4 | robinhood | PASS | only 414480244 agentic_allowed (nickname now "MCP"); total $2980.15 (equity $1475.82, cash $1504.33); holds PURR GOOGL QQQ AMZN META MU NVDA AVGO; NVDA $163.30 (prev close $173.73, -6.0%) |
-| 5 | web | PASS | WebSearch works but no clearly dated today headline; top hit: MarketBeat NVDA news page / "NVIDIA and US Manufacturing and Robotics Leaders Drive America's Reindustrialization With Physical AI" |
-
-Read-only: no review/place/cancel tools called.
+1. git: PASS — main at a012144 (Docs: bot now runs in cloud routines; Mac launchd jobs disabled)
+2. python: PASS — 50 passed in 0.45s
+3. config: PASS — DRY_RUN=False, SYMBOLS=GOOGL AAPL NVDA AVGO MSFT AMZN META MU QQQ TSM NOW CRM
+4. robinhood: PASS — agentic_allowed only on 414480244; total value $2983.56 (equity $1479.23, cash $1504.33); holds PURR GOOGL QQQ AMZN META MU NVDA AVGO; NVDA last $166.04 (after-hours $165.00, prev close $166.19)
+5. web: PASS (weak) — search worked but no dated "today" headline; top result MarketBeat NVDA news page
+6. git push: see commit
+7. ntfy: FAIL — HTTP 000 (blocked by cloud network, expected)
