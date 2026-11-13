@@ -45,8 +45,11 @@
 ## 宏观
 - **CPI** — Consumer Price Index — 消费者物价指数，衡量通胀。
 - **PPI** — Producer Price Index — 生产者物价指数（企业出厂价），常被看作 CPI 的上游/领先指标。
+- **PCE** — Personal Consumption Expenditures — 个人消费支出价格指数，美联储最看重的通胀指标（尤其是核心 PCE）。
 - **FOMC** — Federal Open Market Committee — 美联储议息会议，决定利率。
 - **10 年期美债收益率** — 全球资产定价的"无风险利率"锚。上升 → 未来现金流折现值下降 → 高估值成长股受压。
+- **Duration / 久期** — 资产价格对利率变化的敏感度；现金流越靠后（成长股、长期债券），久期越长，利率上升时跌得越多。
+- **bp** — basis point — 基点，0.01 个百分点（收益率从 5.00% 升到 5.10% = 上升 10bp）。
 - **S&P / S&P 500** — 标普 500 指数；也指评级机构标普（Standard & Poor's）。
 
 ## 交易与工具
