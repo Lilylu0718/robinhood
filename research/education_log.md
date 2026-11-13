@@ -3,6 +3,8 @@
 ## 已介绍公司（在邮件里做过完整介绍的；不在名单里的公司第一次出现时要详细介绍）
 <!-- 格式：SYM — 日期 — 哪封邮件 -->
 - NVDA AVGO GOOGL AMZN META AAPL MSFT MU QQQ PURR TSM NOW CRM ASML — 2026-11-13 — 邮件《开学第一课》（正文浓缩版 + 附件全文，来自 research/intros/）
+- NFLX BKNG ORCL ADBE PANW LRCX Anthropic(ANT) — 2026-11-13 — 周报（完整介绍；素材 research/intros/）
+- 仅简介、未完整介绍（入池时需详细介绍）：AMAT KLAC INTU CRWD PLTR SHOP — 2026-11-13 周报
 - 之后新入池或新闻里第一次出现的重要公司（如 SK 海力士、三星、AMD、Marvell）仍需单独介绍。
 
 ## 已讲知识点（📚 一周内不重复，可以逐步深入）
@@ -10,3 +12,7 @@
 - 2026-11-13 — 10 年期美债收益率与成长股估值（折现率/久期）— 入门
 - 2026-11-13 — RSI 超卖为什么不等于该买（动量 vs 价值，NVDA 例）— 入门
 - 2026-11-13 — CPI vs PPI（通胀的上下游，PPI 略低于预期为何没救市）— 入门
+- 2026-11-13 — 联邦基金利率/加息周期/CME FedWatch — 入门
+- 2026-11-13 — 静态 PE vs 前瞻 PE、价值陷阱（NVDA/ADBE/PANW 例）— 进阶
+- 2026-11-13 — 信用利差与 CDS（ORCL 例）— 入门
+- 2026-11-13 — 拆股与复权（NFLX/BKNG/NOW 例）— 入门
