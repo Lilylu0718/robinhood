@@ -86,5 +86,9 @@
 - **IPO** — Initial Public Offering — 首次公开募股（如 Anthropic 11-19 以 ANT 上市）。
 - **LSEG** — 伦敦证交所集团（数据商，含一致预期数据）。
 
+- **BIS** — Bureau of Industry and Security，美国商务部工业与安全局，负责出口管制（如 AI 芯片出口许可证）。
+- **DSA** — Digital Services Act，欧盟《数字服务法》，可对大型平台罚最高全球营收 6%。
+- **IFR** — Interim Final Rule，临时最终规则：先生效、后征求意见的监管规则。
+
 ## 本项目内部用语
 - **SKIP** — 研判否决机械买入信号；**HOLD** — 不动；**buy_below** — 买入线；**paused** — 暂停买入。
