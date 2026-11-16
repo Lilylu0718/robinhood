@@ -5,7 +5,8 @@
 - NVDA AVGO GOOGL AMZN META AAPL MSFT MU QQQ PURR TSM NOW CRM ASML — 2026-11-13 — 邮件《开学第一课》（正文浓缩版 + 附件全文，来自 research/intros/）
 - NFLX BKNG ORCL ADBE PANW LRCX Anthropic(ANT) — 2026-11-13 — 周报（完整介绍；素材 research/intros/）
 - 仅简介、未完整介绍（入池时需详细介绍）：AMAT KLAC INTU CRWD PLTR SHOP — 2026-11-13 周报
-- 之后新入池或新闻里第一次出现的重要公司（如 SK 海力士、三星、AMD、Marvell）仍需单独介绍。
+- SK海力士 AMD — 2026-11-16 — 日报（素材 research/intros/SKHYNIX.md、AMD.md）
+- 之后新入池或新闻里第一次出现的重要公司（如 三星、Marvell、闪迪）仍需单独介绍。
 
 ## 已讲知识点（📚 一周内不重复，可以逐步深入）
 <!-- 格式：日期 — 概念 — 深度（入门/进阶） -->
