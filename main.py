@@ -172,8 +172,26 @@ def run_pipeline(
 
     res.signals = stop_signals + strat_signals
 
+    # 研判 BUY 可带 max_dollars：只能把 check_risk 批准的金额调小（分批/集中度上限），不能调大
+    caps = {}
+    for j in judgments or []:
+        try:
+            if str(j.get("action", "")).upper() == "BUY" and j.get("max_dollars") is not None:
+                caps[str(j["symbol"]).upper()] = float(j["max_dollars"])
+        except Exception as e:  # noqa: BLE001
+            res.errors.append(f"judgment max_dollars 格式错误: {j!r} ({e})")
+
     for sig in res.signals:
         rr = check_risk(sig, ctx)
+        cap = caps.get(sig.symbol)
+        if rr.approved and rr.order_side == "buy" and cap is not None and rr.dollar_amount \
+                and cap < rr.dollar_amount:
+            if cap <= 1.0:
+                rr = replace(rr, approved=False, order_side=None, dollar_amount=None,
+                             reason=f"研判 max_dollars={cap} 过小，不下单")
+            else:
+                rr = replace(rr, dollar_amount=round(cap, 2),
+                             reason=f"{rr.reason}；研判分批上限 → ${cap:.2f}")
         res.risk_results.append(rr)
         if rr.approved:
             # 本次运行内已批准的单也占用当日交易次数 / 购买力
