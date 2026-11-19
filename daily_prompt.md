@@ -19,6 +19,12 @@
 - `get_equity_positions`（414480244）→ `_positions.json`
 - `get_equity_orders`（414480244，created_at_gte=TODAY）→ `_orders.json`
 
+## 1.6 ₿ BTC 监控（用户自己买，bot 只提醒；2026-11-19 起）
+`get_crypto_quotes(symbols=["BTC-USD"])`（**不带任何账户参数**；绝不调用任何加密下单工具）。取 mark_price，对照 `research/views.md` 的 BTC 分批价位（$62k/$56k/$52k/$46k/$40k）：
+- 当天**首次**跌破某一档（以 `research/<TODAY>.md` 里已记录的为准，别重复推送）→ PushNotification「₿ BTC 到第 N 批价位 $X（建议买 $6k）」，并写进 research 笔记。
+- 每次运行在 `research/<TODAY>.md` 写一行：BTC 现价、离下一档还差多少。日报加「₿ BTC 大局」一节（价格、驱动因素、离下一批的距离、时间兜底进度）。
+- 每天晨研让一个子 agent 顺带查 BTC：ETF 资金流、Fed、Strategy/MSCI、矿工投降。
+
 ## 1.5 长期持有仓位（PURR，只读汇报，永不卖出）
 1股 PURR（Hyperliquid Strategies），成本 $13.80。2026-11-02 用户决定长期持有：`config.LONG_TERM_HOLDS` 已把它排除在止损之外，bot 不会对它生成任何 SELL。
 每次跑到这一步：`get_equity_quotes`（PURR）拿现价，在 `last_run.md` 里加一行"PURR 长期持有：现价、盈亏%"，不标止损/止盈建议。不用写 decisions.csv。
