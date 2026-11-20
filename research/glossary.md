@@ -119,3 +119,14 @@
 - **Wells notice**：SEC 工作人员通知当事人"拟建议对你提起执法行动"，起诉前的最后一步。（2026-11-20）
 - **restatement（财报重述）**：公司承认以前公布的财报有误、重新发布。（2026-11-20）
 - **MUI**：Matter Under Inquiry，SEC 非正式问询阶段。（2026-11-20）
+
+## 2026-11-20 新增
+- **ROTCE** — Return on Tangible Common Equity — 有形普通股回报率，银行赚钱效率。
+- **CET1** — Common Equity Tier 1 ratio — 核心一级资本率，银行抗风险缓冲。
+- **TBV / P/TBV** — Tangible Book Value — 每股有形净资产 / 股价 ÷ 每股有形净资产。
+- **NII** — Net Interest Income — 净利息收入（贷款利息 − 存款利息）。
+- **NT 10-Q** — 延迟提交季报的通知（向 SEC 申请宽限期）。
+- **CMS / MA** — 美国联邦医保管理局 / 联邦医保优势计划（私营保险代管的 Medicare）。
+- **CRUSH（CMS-6098-P）** — CMS 提议的 MA 审计外推追溯规则。
+- **IBIT** — 贝莱德比特币现货 ETF。**MSCI** — 指数编制公司。
+- **修正 / 熊市** — 从高点回撤 10% / 20% 的约定俗成标签。
