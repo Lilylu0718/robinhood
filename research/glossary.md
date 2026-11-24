@@ -130,3 +130,8 @@
 - **CRUSH（CMS-6098-P）** — CMS 提议的 MA 审计外推追溯规则。
 - **IBIT** — 贝莱德比特币现货 ETF。**MSCI** — 指数编制公司。
 - **修正 / 熊市** — 从高点回撤 10% / 20% 的约定俗成标签。
+
+- **HCM** - Human Capital Management，人力资本管理软件（招聘、薪酬、绩效）
+- **ATM 增发** - at-the-market offering，按市价分批增发股票
+- **FT** - Financial Times，英国《金融时报》
+- **EDGAR** - SEC 的公司文件电子数据库
