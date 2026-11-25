@@ -135,3 +135,7 @@
 - **ATM 增发** - at-the-market offering，按市价分批增发股票
 - **FT** - Financial Times，英国《金融时报》
 - **EDGAR** - SEC 的公司文件电子数据库
+- **Beige Book（褐皮书）** — 美联储 12 个地区分行对辖区经济的定性调查汇编，每年 8 次，在 FOMC 会议前约两周发布。
+- **CreditWatch（信用观察）** — 标普把某评级列入"观察"，表示 90 天左右内可能调整；negative=可能下调。比 Outlook（展望，6-24 个月）更紧迫。
+- **USTR** — Office of the U.S. Trade Representative — 美国贸易代表办公室，负责 301 调查和关税方案。
+- **Section 301（301 条款）** — 1974 年贸易法第 301 条，授权 USTR 对"不公平贸易做法"加征关税，需公示、征求意见、听证。
