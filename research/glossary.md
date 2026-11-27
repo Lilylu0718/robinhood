@@ -139,3 +139,8 @@
 - **CreditWatch（信用观察）** — 标普把某评级列入"观察"，表示 90 天左右内可能调整；negative=可能下调。比 Outlook（展望，6-24 个月）更紧迫。
 - **USTR** — Office of the U.S. Trade Representative — 美国贸易代表办公室，负责 301 调查和关税方案。
 - **Section 301（301 条款）** — 1974 年贸易法第 301 条，授权 USTR 对"不公平贸易做法"加征关税，需公示、征求意见、听证。
+- **ISM** — Institute for Supply Management — 美国供应管理协会，每月初发布制造业/服务业 PMI（采购经理人指数），50 以上=扩张。
+- **JOLTS** — Job Openings and Labor Turnover Survey — 职位空缺与劳动力流动调查（劳工部月度），看劳动力市场松紧。
+- **ADP** — ADP 私营部门就业报告，非农前两天发布，被当作非农的"预告"，但两者常常不一致。
+- **DDR4/DDR5** — 第 4/5 代双倍数据速率内存（DRAM 的规格代际）；DDR4 是旧规格，现货价常被当作需求温度计。
+- **OW** — Overweight — 增持评级（高于市场权重），大致等于"买入"。
