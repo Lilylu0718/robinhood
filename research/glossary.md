@@ -145,3 +145,12 @@
 - **DDR4/DDR5** — 第 4/5 代双倍数据速率内存（DRAM 的规格代际）；DDR4 是旧规格，现货价常被当作需求温度计。
 - **OW** — Overweight — 增持评级（高于市场权重），大致等于"买入"。
 - **ROIC** — Return on Invested Capital — 投入资本回报率。
+
+## 2026-11-27 新增
+- **GMV** — Gross Merchandise Volume，成交总额（平台上卖出的商品总金额，不是公司收入）。
+- **TPV** — Total Payment Volume，支付总额（支付平台处理的交易总额）。
+- **NPL** — Non-Performing Loan，不良贷款（逾期一定天数的贷款）占比。
+- **NT 10-Q** — Notification of Late Filing，上市公司无法按期交季报（10-Q）时向 SEC 提交的延期通知，可再宽限 5 天。
+- **10b5-1** — 内部人预设交易计划：事先约定的买卖安排，执行时不算"知情交易"；计划外的主动减持信息量更大。
+- **ABS** — Asset-Backed Securities，资产支持证券（用一批资产的现金流做抵押发的债）。
+- **Brinson 归因** — 把相对基准的超额收益拆成配置效应、选股效应、交互效应。
